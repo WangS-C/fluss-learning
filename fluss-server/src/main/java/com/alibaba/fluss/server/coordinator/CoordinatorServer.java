@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 // CoordinatorServer是集群的中央控制和管理组件。它负责维护元数据、管理 tablet 分配、列出节点和处理权限。
-//此外，它还协调关键操作，例如：
+// 此外，它还协调关键操作，例如：
 // 在节点扩展（升级或降级）期间重新平衡数据。
 // 在发生节点故障时管理数据迁移和服务节点切换。
 // 监督表管理任务，包括创建或删除表以及更新存储桶计数。
@@ -72,6 +72,7 @@ public class CoordinatorServer extends ServerBase {
     private static final Logger LOG = LoggerFactory.getLogger(CoordinatorServer.class);
 
     /** The lock to guard startup / shutdown / manipulation methods. */
+    // 锁定保护启动/ 关闭/ 操作方法。
     private final Object lock = new Object();
 
     private final CompletableFuture<Result> terminationFuture;
@@ -116,14 +117,19 @@ public class CoordinatorServer extends ServerBase {
 
     public CoordinatorServer(Configuration conf) {
         super(conf);
+        // 验证配置
         validateConfigs(conf);
         this.terminationFuture = new CompletableFuture<>();
     }
 
     public static void main(String[] args) {
+        // 加载配置
         Configuration configuration =
                 loadConfiguration(args, CoordinatorServer.class.getSimpleName());
+
         CoordinatorServer coordinatorServer = new CoordinatorServer(configuration);
+
+        // 启动
         startServer(coordinatorServer);
     }
 
@@ -135,6 +141,7 @@ public class CoordinatorServer extends ServerBase {
             this.serverId = UUID.randomUUID().toString();
 
             // for metrics
+            // 初始化指标
             this.metricRegistry = MetricRegistry.create(conf, pluginManager);
             this.serverMetricGroup =
                     ServerMetricUtils.createCoordinatorGroup(
@@ -143,10 +150,13 @@ public class CoordinatorServer extends ServerBase {
                             conf.getString(ConfigOptions.COORDINATOR_HOST),
                             serverId);
 
+            // 启动zk客户端
             this.zkClient = ZooKeeperUtils.startZookeeperClient(conf, this);
 
+            // 创建元数据缓存
             this.metadataCache = new ServerMetadataCacheImpl();
 
+            // 创建RPC网关服务。
             this.coordinatorService =
                     new CoordinatorService(
                             conf,
@@ -155,6 +165,7 @@ public class CoordinatorServer extends ServerBase {
                             this::getCoordinatorEventManager,
                             metadataCache);
 
+            // 创建RpcServer 基于Netty实现
             this.rpcServer =
                     RpcServer.create(
                             conf,
@@ -163,22 +174,28 @@ public class CoordinatorServer extends ServerBase {
                             coordinatorService,
                             RequestsMetrics.createCoordinatorServerRequestMetrics(
                                     serverMetricGroup));
+            // 启动RpcServer
             rpcServer.start();
 
+            // 向zk注册
             registerCoordinatorLeader();
 
+            // 创建 RpcClient
             this.clientMetricGroup = new ClientMetricGroup(metricRegistry, SERVER_NAME);
             this.rpcClient = RpcClient.create(conf, clientMetricGroup);
 
             this.coordinatorChannelManager = new CoordinatorChannelManager(rpcClient);
 
+            // 创建快照管理器
             CompletedSnapshotStoreManager bucketSnapshotManager =
                     new CompletedSnapshotStoreManager(
                             conf.getInt(ConfigOptions.KV_MAX_RETAINED_SNAPSHOTS),
                             conf.getInt(ConfigOptions.COORDINATOR_IO_POOL_SIZE),
                             zkClient);
 
+            // 创建自动分区管理器
             this.autoPartitionManager = new AutoPartitionManager(metadataCache, zkClient, conf);
+            // 启动
             autoPartitionManager.start();
 
             // start coordinator event processor after we register coordinator leader to zk
@@ -186,6 +203,8 @@ public class CoordinatorServer extends ServerBase {
             // up.
             // in HA for coordinator server, the processor also need to know the leader node during
             // start up
+            // 我们将协调器领导者注册到zk后启动协调器事件处理器，以便事件处理器在启动时可以从zk获取协调器领导者节点。
+            // 在协调服务器的HA中，处理器在启动期间还需要知道领导节点
             this.coordinatorEventProcessor =
                     new CoordinatorEventProcessor(
                             zkClient,
@@ -194,8 +213,10 @@ public class CoordinatorServer extends ServerBase {
                             bucketSnapshotManager,
                             autoPartitionManager,
                             serverMetricGroup);
+            // 启动
             coordinatorEventProcessor.startup();
 
+            // 创建默认的数据库
             createDefaultDatabase();
         }
     }
@@ -352,13 +373,17 @@ public class CoordinatorServer extends ServerBase {
         return rpcServer;
     }
 
+    // 验证配置
     private static void validateConfigs(Configuration conf) {
+        // 默认复制因子  不能小于1
         if (conf.get(ConfigOptions.DEFAULT_REPLICATION_FACTOR) < 1) {
             throw new IllegalConfigurationException(
                     String.format(
                             "Invalid configuration for %s, it must be greater than or equal 1.",
                             ConfigOptions.DEFAULT_REPLICATION_FACTOR.key()));
         }
+
+        // 要保留的已完成快照的最大数量。 不能小于1
         if (conf.get(ConfigOptions.KV_MAX_RETAINED_SNAPSHOTS) < 1) {
             throw new IllegalConfigurationException(
                     String.format(
@@ -366,6 +391,7 @@ public class CoordinatorServer extends ServerBase {
                             ConfigOptions.KV_MAX_RETAINED_SNAPSHOTS.key()));
         }
 
+        // 为coordinatorServer运行阻塞操作的IO线程池的大小 包含清理不必要的快照文件
         if (conf.get(ConfigOptions.COORDINATOR_IO_POOL_SIZE) < 1) {
             throw new IllegalConfigurationException(
                     String.format(
@@ -373,6 +399,7 @@ public class CoordinatorServer extends ServerBase {
                             ConfigOptions.COORDINATOR_IO_POOL_SIZE.key()));
         }
 
+        // 用于在Fluss支持的文件系统中存储kv快照数据文件和日志分层存储的远程日志的目录
         if (conf.get(ConfigOptions.REMOTE_DATA_DIR) == null) {
             throw new IllegalConfigurationException(
                     String.format("Configuration %s must be set.", ConfigOptions.REMOTE_DATA_DIR));
