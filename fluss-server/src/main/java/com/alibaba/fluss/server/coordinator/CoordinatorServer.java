@@ -58,6 +58,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *   <li>coordinate the whole cluster, e.g. data re-balance, recover data when tablet servers down
  * </ul>
  */
+
+// CoordinatorServer是集群的中央控制和管理组件。它负责维护元数据、管理 tablet 分配、列出节点和处理权限。
+//此外，它还协调关键操作，例如：
+// 在节点扩展（升级或降级）期间重新平衡数据。
+// 在发生节点故障时管理数据迁移和服务节点切换。
+// 监督表管理任务，包括创建或删除表以及更新存储桶计数。
 public class CoordinatorServer extends ServerBase {
 
     public static final String DEFAULT_DATABASE = "fluss";

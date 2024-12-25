@@ -35,6 +35,8 @@ import java.util.Objects;
  *
  * @since 0.1
  */
+// Bucketing 是 Fluss 中并行性和可扩展性的基本单位。
+// Fluss 中的单个表被划分为多个 bucket。bucket 是读写的最小存储单元。
 @PublicEvolving
 public class TableBucket implements Serializable {
 

@@ -55,6 +55,7 @@ import static com.alibaba.fluss.utils.concurrent.LockUtils.inLock;
  * creation, retrieval, and cleaning. All read and write operations to kv tablet are delegated to
  * the individual instances.
  */
+// KvStore用于存储表数据，功能类似数据库表，支持数据更新和删除，实现高效的查询和表管理，并生成完善的变更日志，方便跟踪数据修改。
 @ThreadSafe
 public final class KvManager extends TabletManagerBase {
 

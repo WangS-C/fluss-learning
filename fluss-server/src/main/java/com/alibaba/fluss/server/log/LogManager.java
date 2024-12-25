@@ -65,6 +65,8 @@ import static com.alibaba.fluss.utils.concurrent.LockUtils.inLock;
  * creation, retrieval, and cleaning. All read and write operations are delegated to the individual
  * log instances.
  */
+// LogStore旨在存储日志数据，功能类似于数据库 binlog。消息只能追加，不能修改，从而确保数据完整性。
+//其主要目的是实现低延迟流式读取，并用作恢复 KvStore 的预写日志 (WAL )。
 @ThreadSafe
 public final class LogManager extends TabletManagerBase {
     private static final Logger LOG = LoggerFactory.getLogger(LogManager.class);

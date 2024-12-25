@@ -81,6 +81,9 @@ import static com.alibaba.fluss.utils.concurrent.LockUtils.inReadLock;
 import static com.alibaba.fluss.utils.concurrent.LockUtils.inWriteLock;
 
 /** A kv tablet which presents a unified view of kv storage. */
+// 底层每个 KvTablet 都对应一个内嵌的 RocksDB 实例。
+// RocksDB 是一个 LSM (log structured merge) 引擎，可以帮助 KvTablet 支持高性能的更新和查找查询。
+
 @ThreadSafe
 public final class KvTablet {
     private static final Logger LOG = LoggerFactory.getLogger(KvTablet.class);

@@ -61,6 +61,9 @@ import static com.alibaba.fluss.utils.IOUtils.closeQuietly;
  * <p>A segment with a base offset of [base_offset] would be stored in two files, a
  * [base_offset].index and a [base_offset].log file.
  */
+// LogTablet中日志存储的最小单位，一个segment由一个.index文件和一个.log数据文件组成。
+// .index：offset sparse index存储消息相对偏移量->.log文件中物理字节地址之间的映射。
+// .log：日志数据的紧凑排列。
 @NotThreadSafe
 @Internal
 public final class LogSegment {

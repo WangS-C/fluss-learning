@@ -26,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 
 /** Handles new connections, requests and responses to and from coordinator/tablet server. */
+// 处理来自协调器/ tablet服务器的新连接、请求和响应。
 public interface RpcServer extends AutoCloseableAsync {
 
     /**
@@ -39,6 +40,7 @@ public interface RpcServer extends AutoCloseableAsync {
      * @param requestsMetrics the requests metrics to report.
      * @return The new RPC server.
      */
+    // 创建可绑定到给定地址和端口的新RPC服务器，并使用给定的RpcGatewayService处理传入请求。
     static RpcServer create(
             Configuration conf,
             String externalAddress,
@@ -50,6 +52,7 @@ public interface RpcServer extends AutoCloseableAsync {
     }
 
     /** Starts the RPC server by binding to the configured bind address and port (blocking). */
+    // 通过绑定到配置的绑定地址和端口 (阻止) 来启动RPC服务器。
     void start() throws IOException;
 
     /**
@@ -57,12 +60,14 @@ public interface RpcServer extends AutoCloseableAsync {
      * server is not started yet or can't determine the address yet, then it will return an empty
      * string.
      */
+    // 返回可访问rpc服务器的主机名或主机地址。如果rpc服务器尚未启动或无法确定地址，则它将返回一个空字符串。
     String getHostname();
 
     /**
      * Return the port under which the rpc server is reachable. If the rpc server is not started yet
      * or can't determine the port yet, then it will return -1.
      */
+    // 返回可访问rpc服务器的端口。如果rpc服务器尚未启动或无法确定端口，则将返回-1。
     int getPort();
 
     CompletableFuture<Void> closeAsync();
@@ -79,5 +84,8 @@ public interface RpcServer extends AutoCloseableAsync {
      *
      * @return The RPC server provided scheduled executor
      */
+    // 从RPC服务器获取计划的执行器。此执行器可用于调度将来要执行的任务。
+    //重要提示: 此执行器不会将方法调用与任何并发调用隔离开来，因此不适合运行修改RpcGatewayService状态的期货的完成方法。
+    //对于此类操作，需要使用该RpcGatewayService的RpcGatewayService # getMainThreadExecutor() MainThreadExecutionContext。
     ScheduledExecutorService getScheduledExecutor();
 }

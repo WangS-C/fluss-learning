@@ -50,6 +50,7 @@ import static com.alibaba.fluss.utils.Preconditions.checkState;
  * Netty based {@link RpcServer} implementation. The RPC server starts a handler to receive RPC
  * invocations from a {@link RpcGateway}.
  */
+// 基于Netty的RpcServer实现。RPC服务器启动处理程序以从RpcGateway接收RPC调用。
 public final class NettyServer implements RpcServer {
 
     private static final Logger LOG = LoggerFactory.getLogger(NettyServer.class);

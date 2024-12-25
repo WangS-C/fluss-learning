@@ -77,6 +77,7 @@ import static com.alibaba.fluss.utils.FileUtils.flushFileIfExists;
  * <p>LogTablet is a physical entity that is responsible for managing the log segments for a
  * particular table bucket.
  */
+// LogTablet支持根据表配置的复制因子创建多个副本，从而确保高可用性和容错能力。
 @ThreadSafe
 public final class LogTablet {
 
