@@ -106,15 +106,19 @@ public abstract class ServerBase implements AutoCloseableAsync, FatalErrorHandle
 
     public void start() throws Exception {
         try {
+            // 添加关机钩子  实际上是调用closeAsync方法
             addShutDownHook();
             // at first, we need to initialize the file system
+            // 初始化文件系统
             pluginManager = PluginUtils.createPluginManagerFromRootFolder(conf);
             FileSystem.initialize(conf, pluginManager);
 
             // get uri for remote data dir
+            // 创建远程文件系统
             String remoteDir = conf.get(ConfigOptions.REMOTE_DATA_DIR);
             remoteFileSystem = new FsPath(remoteDir).getFileSystem();
 
+            // 启动
             startServices();
         } catch (Throwable t) {
             final Throwable strippedThrowable =

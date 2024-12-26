@@ -41,11 +41,13 @@ public class ServerMetadataCacheImpl extends AbstractServerMetadataCache {
                 bucketMetadataLock,
                 () -> {
                     // 1. update coordinator server.
+                    // 更新协调器服务器。
                     ServerNode coordinatorServer =
                             clusterMetadataInfo.getCoordinatorServer().orElse(null);
 
                     // 2. Update the alive table servers. We always use the new alive table servers
                     // to replace the old alive table servers.
+                    // 更新alive表服务器。我们总是使用新的alive table服务器来替换旧的alive table服务器。
                     HashMap<Integer, ServerNode> newAliveTableServers = new HashMap<>();
                     Set<ServerNode> aliveTabletServers =
                             clusterMetadataInfo.getAliveTabletServers();

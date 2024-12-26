@@ -46,6 +46,8 @@ import static com.alibaba.fluss.utils.Preconditions.checkNotNull;
  * {@link CompletedSnapshotStore} not exist for a {@link TableBucket}, it will create a new {@link
  * CompletedSnapshotStore} for it.
  */
+// 管理每个TableBucket的CompletedSnapshotStore的管理器。
+// 当TableBucket不存在CompletedSnapshotStore时，它将为其创建一个新的CompletedSnapshotStore 。
 @NotThreadSafe
 public class CompletedSnapshotStoreManager {
 

@@ -112,6 +112,7 @@ public class ZooKeeperClient implements AutoCloseable {
     // --------------------------------------------------------------------------------------------
 
     /** Register a coordinator leader server to ZK. */
+    // 向 ZK 注册一个协调者领导者服务器。
     public void registerCoordinatorLeader(CoordinatorAddress coordinatorAddress) throws Exception {
         String path = CoordinatorZNode.path();
         zkClient.create()

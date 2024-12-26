@@ -85,7 +85,8 @@ public interface RpcServer extends AutoCloseableAsync {
      * @return The RPC server provided scheduled executor
      */
     // 从RPC服务器获取计划的执行器。此执行器可用于调度将来要执行的任务。
-    //重要提示: 此执行器不会将方法调用与任何并发调用隔离开来，因此不适合运行修改RpcGatewayService状态的期货的完成方法。
-    //对于此类操作，需要使用该RpcGatewayService的RpcGatewayService # getMainThreadExecutor() MainThreadExecutionContext。
+    // 重要提示: 此执行器不会将方法调用与任何并发调用隔离开来，因此不适合运行修改RpcGatewayService状态的期货的完成方法。
+    // 对于此类操作，需要使用该RpcGatewayService的RpcGatewayService # getMainThreadExecutor()
+    // MainThreadExecutionContext。
     ScheduledExecutorService getScheduledExecutor();
 }

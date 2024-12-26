@@ -41,6 +41,8 @@ import java.util.Optional;
  * <p>NOTE: not all tables and buckets are included in the cluster, only used tables by writer or
  * scanner will be included.
  */
+// fluss集群中服务器节点、表、存储桶和模式的子集的不可变表示形式。
+// 注意: 并非所有表和存储桶都包含在集群中，仅包含writer或scanner使用的表
 @Internal
 public final class Cluster {
     @Nullable private final ServerNode coordinatorServer;

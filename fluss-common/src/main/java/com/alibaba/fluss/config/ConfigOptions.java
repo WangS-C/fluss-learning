@@ -67,6 +67,7 @@ public class ConfigOptions {
                                     + "and all the tables without specifying bucket number in the cluster will use the value "
                                     + "as the bucket number.");
 
+    // Fluss集群中日志表的默认复制因子
     public static final ConfigOption<Integer> DEFAULT_REPLICATION_FACTOR =
             key("default.replication.factor")
                     .intType()
@@ -916,6 +917,7 @@ public class ConfigOptions {
                     .withDescription(
                             "The number of threads the server uses to transfer (download and upload) kv snapshot files.");
 
+    // 要保留的已完成快照的最大数量。
     public static final ConfigOption<Integer> KV_MAX_RETAINED_SNAPSHOTS =
             key("kv.snapshot.num-retained")
                     .intType()

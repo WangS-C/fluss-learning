@@ -64,6 +64,8 @@ import static com.alibaba.fluss.utils.concurrent.LockUtils.inLock;
  * periodically. It'll use a {@link ScheduledExecutorService} to schedule the auto partition which
  * will trigger auto partition for them.
  */
+// 自动分区管理器将定期触发集群中表的自动分区。
+// 它将使用ScheduledExecutorService来安排自动分区，这将触发它们的自动分区。
 public class AutoPartitionManager implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoPartitionManager.class);

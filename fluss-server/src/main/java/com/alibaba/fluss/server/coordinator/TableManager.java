@@ -61,6 +61,7 @@ public class TableManager {
         replicaStateMachine.startup();
         tableBucketStateMachine.startup();
         // try to resume one deletion after start up
+        // 尝试在启动后恢复一个删除
         resumeDeletions();
     }
 

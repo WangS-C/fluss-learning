@@ -67,9 +67,9 @@ import static com.alibaba.fluss.config.ConfigOptions.BACKGROUND_THREADS;
  */
 // Tablet server实施。tablet服务器负责管理log tablet和kv tablet。
 
-//TabletServer负责数据存储、持久化以及直接向用户提供 I/O 服务，它由两个关键组件组成：LogStore和KvStore。
-//对于支持更新的PrimaryKey 表， LogStore和KvStore均被激活。KvStore 用于高效支持更新和点查找。LogStore 用于存储表的更新日志。
-//对于仅支持附加的日志表，仅激活LogStore，从而优化写入密集型工作负载的性能。
+// TabletServer负责数据存储、持久化以及直接向用户提供 I/O 服务，它由两个关键组件组成：LogStore和KvStore。
+// 对于支持更新的PrimaryKey 表， LogStore和KvStore均被激活。KvStore 用于高效支持更新和点查找。LogStore 用于存储表的更新日志。
+// 对于仅支持附加的日志表，仅激活LogStore，从而优化写入密集型工作负载的性能。
 public class TabletServer extends ServerBase {
 
     private static final String SERVER_NAME = "TabletServer";
@@ -82,7 +82,7 @@ public class TabletServer extends ServerBase {
     private final int serverId;
 
     /** The lock to guard startup / shutdown / manipulation methods. */
-    //锁定保护启动/ 关闭/ 操作方法。
+    // 锁定保护启动/ 关闭/ 操作方法。
     private final Object lock = new Object();
 
     private final CompletableFuture<Result> terminationFuture;

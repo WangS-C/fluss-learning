@@ -28,10 +28,13 @@ import java.util.Set;
  *
  * @see TableAssignmentJsonSerde for json serialization and deserialization.
  */
+// 表的分配由每个桶的副本分配组成。该分配表示为整数列表，其中每个整数都是副本 ID（服务器 ID）。
+// 分配信息存储在ZkData. TableIdZNode中。
 public class TableAssignment {
     // a mapping from bucket id to assignment something like "{0: [0, 1, 3]}".
     // the assignment is represented as a list of replica id (tabletserver id) where the first
     // replica id will be considered as the replica leader.
+    // 从存储桶 ID 到分配的映射，例如“{0: [0, 1, 3]}”。该分配表示为副本 id (tabletserver id) 列表，其中第一个副本 id 将被视为副本领导者
     private final Map<Integer, BucketAssignment> assignments;
 
     public TableAssignment(Map<Integer, BucketAssignment> assignments) {
