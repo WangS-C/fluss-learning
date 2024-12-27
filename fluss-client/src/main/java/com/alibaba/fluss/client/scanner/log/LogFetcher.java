@@ -84,8 +84,8 @@ public class LogFetcher implements Closeable {
     private final boolean isPartitioned;
     private final LogRecordReadContext readContext;
     // TODO this context can be merge with readContext. Introduce it only because log remote read
-    // currently can only do project when generate scanRecord instead of doing project while read
-    // bytes from remote file.
+    //  currently can only do project when generate scanRecord instead of doing project while read
+    //  bytes from remote file.
     private final LogRecordReadContext remoteReadContext;
     @Nullable private final Projection projection;
     private final RpcClient rpcClient;
@@ -117,8 +117,9 @@ public class LogFetcher implements Closeable {
             RemoteFileDownloader remoteFileDownloader) {
         this.tablePath = tableInfo.getTablePath();
         this.isPartitioned = tableInfo.getTableDescriptor().isPartitioned();
-        this.readContext = LogRecordReadContext.createReadContext(tableInfo, projection);
-        this.remoteReadContext = LogRecordReadContext.createReadContext(tableInfo, null);
+        this.readContext = LogRecordReadContext.createReadContext(tableInfo, false, projection);
+        this.remoteReadContext =
+                LogRecordReadContext.createReadContext(tableInfo, true, projection);
         this.projection = projection;
         this.rpcClient = rpcClient;
         this.logScannerStatus = logScannerStatus;
@@ -313,9 +314,10 @@ public class LogFetcher implements Closeable {
                                                 fetchResultForBucket,
                                                 readContext,
                                                 logScannerStatus,
+                                                // skipping CRC check if projection push downed as
+                                                // the data is pruned
                                                 isCheckCrcs,
-                                                fetchOffset,
-                                                projection);
+                                                fetchOffset);
                                 logFetchBuffer.add(completedFetch);
                             }
                         }
@@ -352,8 +354,7 @@ public class LogFetcher implements Closeable {
                             highWatermark,
                             remoteReadContext,
                             logScannerStatus,
-                            isCheckCrcs,
-                            projection);
+                            isCheckCrcs);
             logFetchBuffer.pend(pendingFetch);
             downloadFuture.onComplete(logFetchBuffer::tryComplete);
         }
@@ -421,7 +422,8 @@ public class LogFetcher implements Closeable {
                                         .setMaxBytes(maxFetchBytes);
                         PbFetchLogReqForTable reqForTable =
                                 new PbFetchLogReqForTable().setTableId(finalTableId);
-                        if (projection != null) {
+                        if (readContext.isProjectionPushDowned()) {
+                            assert projection != null;
                             reqForTable
                                     .setProjectionPushdownEnabled(true)
                                     .setProjectedFields(projection.getProjectionInOrder());
