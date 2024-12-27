@@ -27,7 +27,6 @@ import com.alibaba.fluss.server.entity.AdjustIsrResultForBucket;
 import com.alibaba.fluss.server.utils.RpcMessageUtils;
 import com.alibaba.fluss.server.zk.data.LeaderAndIsr;
 import com.alibaba.fluss.utils.concurrent.Scheduler;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +50,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>Note that ISR state changes can still be initiated by the coordinator server and sent to the
  * replicas via NotifyLeaderAndIsr requests.
  */
+//通过将AdjustIsrRequest发送到协调器服务器来处理更新ISR。更新ISR是一个异步操作，因此replica将通过回调了解其请求的结果。
+//请注意，ISR状态更改仍然可以由协调器服务器启动，并通过NotifyLeaderAndIsr请求发送到副本。
 public class AdjustIsrManager {
     private static final Logger LOG = LoggerFactory.getLogger(AdjustIsrManager.class);
 
@@ -58,10 +59,14 @@ public class AdjustIsrManager {
     private final Scheduler scheduler;
     private final int serverId;
 
-    /** Used to allow only one pending adjust Isr request per bucket (visible for testing). */
+    /**
+     * Used to allow only one pending adjust Isr request per bucket (visible for testing).
+     */
     protected final Map<TableBucket, AdjustIsrItem> unsentAdjustIsrMap = new ConcurrentHashMap<>();
 
-    /** Used to allow only one in-flight request at a time. */
+    /**
+     * Used to allow only one in-flight request at a time.
+     */
     private final AtomicBoolean inflightRequest = new AtomicBoolean(false);
 
     public AdjustIsrManager(
@@ -180,7 +185,9 @@ public class AdjustIsrManager {
         }
     }
 
-    /** per bucket leader and isr data with future result callback. */
+    /**
+     * per bucket leader and isr data with future result callback.
+     */
     @VisibleForTesting
     protected static class AdjustIsrItem {
         protected final TableBucket tableBucket;

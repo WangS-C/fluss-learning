@@ -42,49 +42,82 @@ import static com.alibaba.fluss.utils.Preconditions.checkState;
  */
 public class FlussPaths {
 
-    /** Prefix of a local log tablet directory to store log files for a specific log tablet. */
+    /**
+     * Prefix of a local log tablet directory to store log files for a specific log tablet.
+     */
+    // 本地日志tablet目录的前缀，用于存储特定日志tablet的日志文件。
     public static final String LOG_TABLET_DIR_PREFIX = "log-";
 
-    /** Prefix of a local kv tablet directory to store kv files for a specific kv tablet. */
+    /**
+     * Prefix of a local kv tablet directory to store kv files for a specific kv tablet.
+     */
+    // 本地kv tablet目录的前缀，用于存储特定kv tablet的kv文件。
     public static final String KV_TABLET_DIR_PREFIX = "kv-";
 
-    /** Prefix for a partition id to distinguish between table id and partition id. */
+    /**
+     * Prefix for a partition id to distinguish between table id and partition id.
+     */
+    // 分区 ID 的前缀，用于区分表 ID 和分区 ID。
     public static final String PARTITION_DIR_PREFIX = "p";
 
-    /** Suffix of a log file. */
+    /**
+     * Suffix of a log file.
+     */
     public static final String LOG_FILE_SUFFIX = ".log";
 
-    /** Suffix of an index file. */
+    /**
+     * Suffix of an index file.
+     */
     public static final String INDEX_FILE_SUFFIX = ".index";
 
-    /** Suffix of a time index file. */
+    /**
+     * Suffix of a time index file.
+     */
     public static final String TIME_INDEX_FILE_SUFFIX = ".timeindex";
 
-    /** Suffix of a writer snapshot file. */
+    /**
+     * Suffix of a writer snapshot file.
+     */
     public static final String WRITER_SNAPSHOT_FILE_SUFFIX = ".writer_snapshot";
 
-    /** The directory name for storing remote log index files. */
+    /**
+     * The directory name for storing remote log index files.
+     */
     public static final String REMOTE_LOG_INDEX_LOCAL_CACHE = "remote-log-index-cache";
 
-    /** The directory name for storing remote log files. */
+    /**
+     * The directory name for storing remote log files.
+     */
     public static final String REMOTE_LOG_DIR_NAME = "log";
 
-    /** The directory name for storing metadata files (e.g., manifest) for a log tablet. */
+    /**
+     * The directory name for storing metadata files (e.g., manifest) for a log tablet.
+     */
     private static final String REMOTE_LOG_METADATA_DIR_NAME = "metadata";
 
-    /** Suffix of a manifest file. */
+    /**
+     * Suffix of a manifest file.
+     */
     private static final String REMOTE_LOG_MANIFEST_FILE_SUFFIX = ".manifest";
 
-    /** Suffix for a file that is scheduled to be deleted. */
+    /**
+     * Suffix for a file that is scheduled to be deleted.
+     */
     public static final String DELETED_FILE_SUFFIX = ".deleted";
 
-    /** The directory name for storing remote kv snapshot files. */
+    /**
+     * The directory name for storing remote kv snapshot files.
+     */
     public static final String REMOTE_KV_DIR_NAME = "kv";
 
-    /** The prefix of directory containing the remote kv snapshot data exclusive to a snapshot. */
+    /**
+     * The prefix of directory containing the remote kv snapshot data exclusive to a snapshot.
+     */
     public static final String REMOTE_KV_SNAPSHOT_DIR_PREFIX = "snap-";
 
-    /** The name of the directory for shared remote snapshot kv files. */
+    /**
+     * The name of the directory for shared remote snapshot kv files.
+     */
     public static final String REMOTE_KV_SNAPSHOT_SHARED_DIR = "shared";
 
     // ----------------------------------------------------------------------------------------
@@ -164,8 +197,9 @@ public class FlussPaths {
      * structure.
      *
      * @return tuple2 of (physical table path, table bucket), if the tablet is not for a partition,
-     *     the partition name will be null.
+     * the partition name will be null.
      */
+    // 从给定的 (log/ kv) tablet目录解析表路径、可选分区名称和存储桶id。
     public static Tuple2<PhysicalTablePath, TableBucket> parseTabletDir(File tabletDir) {
         checkNotNull(tabletDir, "tabletDir should not be null");
 
@@ -175,25 +209,33 @@ public class FlussPaths {
 
         // may be a tablet for a partition, get the parent directory
         // check whether it matches the pattern for a partition
+        //可能是一个分区的tablet，得到父目录
+        //检查是否匹配分区模式
         String tabletParentDirName = tabletDir.getParentFile().getName();
+        // 判断是否是分区目录
         if (isPartitionDir(tabletParentDirName)) {
             // tabletParentDirName should be {partitionName}-p{partitionId}
+            // TabletParentDirName应为 {partitionName}-p{partitionId}
             int splitIndex = tabletParentDirName.lastIndexOf('-');
             String lastSplit = tabletParentDirName.substring(splitIndex + 1);
             partitionName = tabletParentDirName.substring(0, splitIndex);
             partitionId = Long.parseLong(lastSplit.substring(PARTITION_DIR_PREFIX.length()));
             // for partitioned tables, the parent of the partition dir is the table dir
+            // 对于分区表，分区目录的父级是表目录
             tableDir = tabletDir.getParentFile().getParentFile();
         } else {
             // for non-partitioned tables, the parent of the tablet dir is the table dir
+            // 对于非分区表，tablet目录的父级是表目录
             tableDir = tabletDir.getParentFile();
             partitionName = null;
             partitionId = null;
         }
 
         // Get path with db name.
+        // 获取DB目录名称
         String dbDirName = tableDir.getParentFile().getName();
         // Get path with table name and table id.
+        // 获取表目录名称 格式是{tableName}-{tableId}
         String tableDirName = tableDir.getName();
         checkState(
                 tableDirName.contains("-"),
@@ -203,7 +245,9 @@ public class FlussPaths {
         long tableId;
         int splitIndex = tableDirName.lastIndexOf("-");
         try {
+            // 获取表ID
             tableId = Long.parseLong(tableDirName.substring(splitIndex + 1));
+            // 获取表名
             tableName = tableDirName.substring(0, splitIndex);
         } catch (Exception e) {
             throw new IllegalArgumentException(
@@ -211,6 +255,7 @@ public class FlussPaths {
         }
 
         // Get path with bucket id.
+        //  tablet 目录名称 格式是log-{bucket} 或者 kv-{bucket}
         String tabletDirName = tabletDir.getName();
         String[] bucketIdSplit = tabletDirName.split("-");
         checkState(
@@ -224,6 +269,7 @@ public class FlussPaths {
                 tabletDirName);
         int bucketId;
         try {
+            // 获取桶ID
             bucketId = Integer.parseInt(bucketIdSplit[1]);
         } catch (Exception e) {
             throw new IllegalArgumentException(
@@ -235,6 +281,7 @@ public class FlussPaths {
                 new TableBucket(tableId, partitionId, bucketId));
     }
 
+    // 判断是否是分区目录
     public static boolean isPartitionDir(String dirName) {
         int splitIndex = dirName.lastIndexOf('-');
         return splitIndex >= 0
@@ -249,8 +296,9 @@ public class FlussPaths {
      * Construct a log file name in the given dir with the given base offset and the given suffix.
      *
      * @param logTabletDir The log tablet directory in which the log will reside
-     * @param offset The base offset of the log file
+     * @param offset       The base offset of the log file
      */
+    // 在给定的dir中构造具有给定的基偏移量和给定的后缀的日志文件名。
     public static File logFile(File logTabletDir, long offset) {
         return new File(logTabletDir, filenamePrefixFromOffset(offset) + LOG_FILE_SUFFIX);
     }
@@ -258,7 +306,7 @@ public class FlussPaths {
     /**
      * Construct an index file name in the given dir using the given base offset.
      *
-     * @param dir The directory in which the log will reside
+     * @param dir    The directory in which the log will reside
      * @param offset The base offset of the log file
      */
     public static File offsetIndexFile(File dir, long offset) {
@@ -290,7 +338,7 @@ public class FlussPaths {
     /**
      * Construct a time index file name in the given dir using the given base offset.
      *
-     * @param dir The directory in which the log will reside
+     * @param dir    The directory in which the log will reside
      * @param offset The base offset of the log file
      */
     public static File timeIndexFile(File dir, long offset) {
@@ -302,7 +350,7 @@ public class FlussPaths {
      * file for the given offset.
      *
      * @param logTabletDir The log tablet directory in which the log will reside
-     * @param offset The last offset (exclusive) included in the snapshot
+     * @param offset       The last offset (exclusive) included in the snapshot
      * @return a File instance for producer snapshot.
      */
     public static File writerSnapshotFile(File logTabletDir, long offset) {
@@ -354,7 +402,7 @@ public class FlussPaths {
      * </pre>
      *
      * @param cacheDir see {@link #remoteLogIndexCacheDir(File)}.
-     * @param segment the remote log segment for the offset index.
+     * @param segment  the remote log segment for the offset index.
      */
     public static File remoteOffsetIndexCacheFile(File cacheDir, RemoteLogSegment segment) {
         String prefix = segment.remoteLogStartOffset() + "_" + segment.remoteLogSegmentId();
@@ -371,7 +419,7 @@ public class FlussPaths {
      * </pre>
      *
      * @param cacheDir see {@link #remoteLogIndexCacheDir(File)}.
-     * @param segment the remote log segment for the offset index.
+     * @param segment  the remote log segment for the offset index.
      */
     public static File remoteTimeIndexCacheFile(File cacheDir, RemoteLogSegment segment) {
         String prefix = segment.remoteLogStartOffset() + "_" + segment.remoteLogSegmentId();
@@ -443,8 +491,8 @@ public class FlussPaths {
      * </pre>
      *
      * @param remoteLogTabletDir see {@link #remoteLogTabletDir(FsPath, PhysicalTablePath,
-     *     TableBucket)}
-     * @param manifestId the UUID of the manifest
+     *                           TableBucket)}
+     * @param manifestId         the UUID of the manifest
      */
     public static FsPath remoteLogManifestFile(FsPath remoteLogTabletDir, UUID manifestId) {
         return new FsPath(
@@ -462,14 +510,16 @@ public class FlussPaths {
      * </pre>
      *
      * @param remoteLogTabletDir the remote log tablet dir, see {@link #remoteLogTabletDir(FsPath,
-     *     PhysicalTablePath, TableBucket)}
+     *                           PhysicalTablePath, TableBucket)}
      * @param remoteLogSegmentId the UUID of the remote log segment
      */
     public static FsPath remoteLogSegmentDir(FsPath remoteLogTabletDir, UUID remoteLogSegmentId) {
         return new FsPath(remoteLogTabletDir, remoteLogSegmentId.toString());
     }
 
-    /** Returns the remote directory path for storing log segment files (log and index files). */
+    /**
+     * Returns the remote directory path for storing log segment files (log and index files).
+     */
     public static FsPath remoteLogSegmentDir(
             FsPath remoteLogDir, RemoteLogSegment remoteLogSegment) {
         return new FsPath(
@@ -490,15 +540,17 @@ public class FlussPaths {
      * </pre>
      *
      * @param remoteLogSegmentDir the remote log segment dir, see {@link
-     *     #remoteLogSegmentDir(FsPath, UUID)}
-     * @param baseOffset the base offset of the log segment
+     *                            #remoteLogSegmentDir(FsPath, UUID)}
+     * @param baseOffset          the base offset of the log segment
      */
     public static FsPath remoteLogSegmentFile(FsPath remoteLogSegmentDir, long baseOffset) {
         return new FsPath(
                 remoteLogSegmentDir, filenamePrefixFromOffset(baseOffset) + LOG_FILE_SUFFIX);
     }
 
-    /** Returns the remote file path for storing the offset index file. */
+    /**
+     * Returns the remote file path for storing the offset index file.
+     */
     public static FsPath remoteOffsetIndexFile(
             FsPath remoteLogDir, RemoteLogSegment remoteLogSegment, String indexSuffix) {
         return remoteLogIndexFile(
@@ -522,8 +574,8 @@ public class FlussPaths {
      * </pre>
      *
      * @param remoteLogSegmentDir the remote log segment dir, see {@link
-     *     #remoteLogSegmentDir(FsPath, UUID)}
-     * @param baseOffset the base offset of the log segment
+     *                            #remoteLogSegmentDir(FsPath, UUID)}
+     * @param baseOffset          the base offset of the log segment
      */
     public static FsPath remoteOffsetIndexFile(FsPath remoteLogSegmentDir, long baseOffset) {
         return remoteLogIndexFile(remoteLogSegmentDir, baseOffset, INDEX_FILE_SUFFIX);
@@ -539,9 +591,9 @@ public class FlussPaths {
      * </pre>
      *
      * @param remoteLogSegmentDir the remote log segment dir, see {@link
-     *     #remoteLogSegmentDir(FsPath, UUID)}
-     * @param baseOffset the base offset of the log segment
-     * @param indexSuffix the file suffix of the index file
+     *                            #remoteLogSegmentDir(FsPath, UUID)}
+     * @param baseOffset          the base offset of the log segment
+     * @param indexSuffix         the file suffix of the index file
      */
     public static FsPath remoteLogIndexFile(
             FsPath remoteLogSegmentDir, long baseOffset, String indexSuffix) {
@@ -597,8 +649,8 @@ public class FlussPaths {
      * </pre>
      *
      * @param remoteKvTabletDir the remote kv tablet dir, see {@link #remoteKvTabletDir(FsPath,
-     *     PhysicalTablePath, TableBucket)}.
-     * @param snapshotId the unique id of the kv snapshot.
+     *                          PhysicalTablePath, TableBucket)}.
+     * @param snapshotId        the unique id of the kv snapshot.
      */
     public static FsPath remoteKvSnapshotDir(FsPath remoteKvTabletDir, long snapshotId) {
         return new FsPath(remoteKvTabletDir, REMOTE_KV_SNAPSHOT_DIR_PREFIX + snapshotId);
@@ -615,7 +667,7 @@ public class FlussPaths {
      * </pre>
      *
      * @param remoteKvTabletDir the remote kv tablet dir, see {@link #remoteKvTabletDir(FsPath,
-     *     PhysicalTablePath, TableBucket)}.
+     *                          PhysicalTablePath, TableBucket)}.
      */
     public static FsPath remoteKvSharedDir(FsPath remoteKvTabletDir) {
         return new FsPath(remoteKvTabletDir, REMOTE_KV_SNAPSHOT_SHARED_DIR);

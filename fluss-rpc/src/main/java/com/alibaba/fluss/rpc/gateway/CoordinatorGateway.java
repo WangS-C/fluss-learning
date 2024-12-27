@@ -30,7 +30,10 @@ import com.alibaba.fluss.rpc.protocol.RPC;
 
 import java.util.concurrent.CompletableFuture;
 
-/** The entry point of RPC gateway interface for coordinator server. */
+/**
+ * The entry point of RPC gateway interface for coordinator server.
+ */
+// coordinator服务器的RPC网关接口的入口点。
 public interface CoordinatorGateway extends RpcGateway, AdminGateway {
 
     /**

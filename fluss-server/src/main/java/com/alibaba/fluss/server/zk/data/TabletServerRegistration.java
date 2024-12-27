@@ -23,6 +23,7 @@ import java.util.Objects;
  *
  * @see TabletServerRegistrationJsonSerde for json serialization and deserialization.
  */
+// ZkData. ServerIdZNode中存储的tablet server的注册信息。
 public class TabletServerRegistration {
     private final String host;
     private final int port;

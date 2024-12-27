@@ -64,7 +64,10 @@ import java.util.concurrent.CompletableFuture;
 import static com.alibaba.fluss.server.utils.RpcMessageUtils.makeLookupResponse;
 import static com.alibaba.fluss.server.utils.RpcMessageUtils.toLookupData;
 
-/** An RPC Gateway service for tablet server. */
+/**
+ * An RPC Gateway service for tablet server.
+ */
+// tablet server的RPC网关服务。
 public final class TabletService extends RpcServiceBase implements TabletServerGateway {
 
     private final String serviceName;
@@ -88,7 +91,8 @@ public final class TabletService extends RpcServiceBase implements TabletServerG
     }
 
     @Override
-    public void shutdown() {}
+    public void shutdown() {
+    }
 
     @Override
     public CompletableFuture<ProduceLogResponse> produceLog(ProduceLogRequest request) {

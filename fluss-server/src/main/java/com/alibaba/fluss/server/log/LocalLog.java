@@ -31,13 +31,11 @@ import com.alibaba.fluss.record.FileLogProjection;
 import com.alibaba.fluss.record.MemoryLogRecords;
 import com.alibaba.fluss.utils.FileUtils;
 import com.alibaba.fluss.utils.FlussPaths;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -63,6 +61,8 @@ import static com.alibaba.fluss.utils.FileUtils.flushDirIfExists;
  * <p>NOTE: this class is not thread-safe, and it relies on the thread safety provided by the Log
  * class.
  */
+// 用于在本地存储消息的仅追加日志。日志是一系列日志段，每个日志段都有一个基本偏移量。根据控制给定段的字节大小或时间间隔的可配置策略来创建新的日志段。
+//注意: 这个类不是线程安全的，它依赖于日志类提供的线程安全。
 @NotThreadSafe
 public final class LocalLog {
     private static final Logger LOG = LoggerFactory.getLogger(LocalLog.class);
@@ -132,7 +132,9 @@ public final class LocalLog {
         return flushCount;
     }
 
-    /** The offset metadata of the next message that will be appended to the log. */
+    /**
+     * The offset metadata of the next message that will be appended to the log.
+     */
     @VisibleForTesting
     LogOffsetMetadata getLocalLogEndOffsetMetadata() {
         return nextOffsetMetadata;
@@ -246,13 +248,17 @@ public final class LocalLog {
         isMemoryMappedBufferClosed = true;
     }
 
-    /** Closes the segments of the log. */
+    /**
+     * Closes the segments of the log.
+     */
     void close() {
         checkIfMemoryMappedBufferClosed();
         segments.close();
     }
 
-    /** Completely delete this log directory with no delay. */
+    /**
+     * Completely delete this log directory with no delay.
+     */
     void deleteEmptyDir() throws IOException {
         if (!segments.isEmpty()) {
             throw new IllegalStateException(
@@ -291,7 +297,7 @@ public final class LocalLog {
      * caller is expected to catch and handle IOException.
      *
      * @param segmentsToDelete The log segments to schedule for deletion
-     * @param reason The reason for the segment deletion
+     * @param reason           The reason for the segment deletion
      */
     void removeAndDeleteSegments(List<LogSegment> segmentsToDelete, SegmentDeletionReason reason)
             throws IOException {
@@ -317,9 +323,9 @@ public final class LocalLog {
      * <p>This method does not convert IOException to {@link LogStorageException}, the immediate
      * caller is expected to catch and handle IOException.
      *
-     * @param newOffset The base offset of the new segment
+     * @param newOffset       The base offset of the new segment
      * @param segmentToDelete The old active segment to schedule for deletion
-     * @param reason The reason for the segment deletion
+     * @param reason          The reason for the segment deletion
      */
     LogSegment createAndDeleteSegment(
             long newOffset, LogSegment segmentToDelete, SegmentDeletionReason reason)
@@ -352,14 +358,14 @@ public final class LocalLog {
     /**
      * Read messages from the log.
      *
-     * @param readOffset The offset to begin reading at
-     * @param maxLength The maximum number of bytes to read
-     * @param minOneMessage If this is true, the first message will be returned even if it exceeds
-     *     `maxLength` (if one exists)
+     * @param readOffset        The offset to begin reading at
+     * @param maxLength         The maximum number of bytes to read
+     * @param minOneMessage     If this is true, the first message will be returned even if it exceeds
+     *                          `maxLength` (if one exists)
      * @param maxOffsetMetadata The metadata of the maximum offset to be fetched
-     * @throws LogOffsetOutOfRangeException If startOffset is beyond the log start and end offset
      * @return The fetch data information including fetch starting offset metadata and messages
-     *     read.
+     * read.
+     * @throws LogOffsetOutOfRangeException If startOffset is beyond the log start and end offset
      */
     public FetchDataInfo read(
             long readOffset,
@@ -579,7 +585,7 @@ public final class LocalLog {
      * Truncate this log so that it ends with the greatest offset < targetOffset.
      *
      * @param targetOffset The offset to truncate to, an upper bound on all offsets in the log after
-     *     truncation is complete.
+     *                     truncation is complete.
      * @return the list of segments that were scheduled for deletion
      */
     List<LogSegment> truncateTo(long targetOffset) throws IOException {
@@ -597,10 +603,12 @@ public final class LocalLog {
     // Static method
     // --------------------------------------------------------------------------------------------
 
+    // 是日志文件
     static boolean isLogFile(File file) {
         return file.getPath().endsWith(FlussPaths.LOG_FILE_SUFFIX);
     }
 
+    // 是索引文件
     static boolean isIndexFile(File file) {
         String fileName = file.getName();
         return fileName.endsWith(FlussPaths.INDEX_FILE_SUFFIX)
@@ -619,7 +627,9 @@ public final class LocalLog {
         }
     }
 
-    /** Reason for deleting segments. */
+    /**
+     * Reason for deleting segments.
+     */
     public interface SegmentDeletionReason {
         SegmentDeletionReason LOG_TRUNCATION = new LogTruncation();
         SegmentDeletionReason LOG_ROLL = new LogRoll();
@@ -629,7 +639,9 @@ public final class LocalLog {
         void logReason(List<LogSegment> toDelete);
     }
 
-    /** Delete with truncation. */
+    /**
+     * Delete with truncation.
+     */
     private static class LogTruncation implements SegmentDeletionReason {
         @Override
         public void logReason(List<LogSegment> toDelete) {
@@ -637,7 +649,9 @@ public final class LocalLog {
         }
     }
 
-    /** Delete with roll. */
+    /**
+     * Delete with roll.
+     */
     private static class LogRoll implements SegmentDeletionReason {
         @Override
         public void logReason(List<LogSegment> toDelete) {
@@ -645,7 +659,9 @@ public final class LocalLog {
         }
     }
 
-    /** Delete. */
+    /**
+     * Delete.
+     */
     private static class LogDeletion implements SegmentDeletionReason {
         @Override
         public void logReason(List<LogSegment> toDelete) {
@@ -653,7 +669,9 @@ public final class LocalLog {
         }
     }
 
-    /** Move to remote storage. */
+    /**
+     * Move to remote storage.
+     */
     private static class LogMoveToRemote implements SegmentDeletionReason {
         @Override
         public void logReason(List<LogSegment> toDelete) {

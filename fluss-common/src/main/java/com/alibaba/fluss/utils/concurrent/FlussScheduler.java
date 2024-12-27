@@ -18,7 +18,6 @@ package com.alibaba.fluss.utils.concurrent;
 
 import com.alibaba.fluss.annotation.Internal;
 import com.alibaba.fluss.annotation.VisibleForTesting;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * <p>It has a pool of fluss-scheduler- threads that do the actual work.
  */
+// 基于ScheduledThreadPoolExecutor的调度程序。
+//它有一个执行实际工作的 fluss-scheduler-threads 池。
 @Internal
 public class FlussScheduler implements Scheduler {
 
@@ -48,6 +49,7 @@ public class FlussScheduler implements Scheduler {
     private final String threadNamePrefix;
 
     // TODO there is no need to use volatile and synchronized together. We can use volatile only.
+    // 没有必要同时使用 volatile 和synchronized。我们只需要 volatile。
     private volatile ScheduledThreadPoolExecutor executor;
 
     public FlussScheduler(int threads) {
@@ -87,6 +89,7 @@ public class FlussScheduler implements Scheduler {
         LOG.debug("Shutting down task scheduler.");
         // We use the local variable to avoid NullPointerException if another thread shuts down
         // scheduler at same time.
+        // 如果另一个线程同时关闭调度程序，我们使用局部变量来避免 NullPointerException。
         ScheduledThreadPoolExecutor maybeExecutor = null;
         synchronized (this) {
             if (isStarted()) {

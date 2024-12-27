@@ -24,7 +24,6 @@ import com.alibaba.fluss.utils.FileUtils;
 import com.alibaba.fluss.utils.IOUtils;
 
 import javax.annotation.Nullable;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @since 0.1
  */
+// 用于描述文件中的多个LogRecordBatch的实体。
 @PublicEvolving
 public class FileLogRecords implements LogRecords, Closeable {
 
@@ -112,10 +112,10 @@ public class FileLogRecords implements LogRecords, Closeable {
      * Read log batches into the given buffer until there are no bytes remaining in the buffer or
      * the end of the file is reached.
      *
-     * @param buffer The buffer to write the batches to
+     * @param buffer   The buffer to write the batches to
      * @param position Position in the buffer to read from
      * @throws IOException If an I/O error occurs, see {@link FileChannel#read(ByteBuffer, long)}
-     *     for details on the possible exceptions
+     *                     for details on the possible exceptions
      */
     public void readInto(ByteBuffer buffer, int position) throws IOException {
         FileUtils.readFully(channel, buffer, position + this.start);
@@ -133,7 +133,7 @@ public class FileLogRecords implements LogRecords, Closeable {
      * slicing.
      *
      * @param position The start position to begin the read from
-     * @param size The number of bytes after the start position to include
+     * @param size     The number of bytes after the start position to include
      * @return A sliced wrapper on this message set limited based on the given position and size
      */
     public FileLogRecords slice(int position, int size) throws IOException {
@@ -183,12 +183,16 @@ public class FileLogRecords implements LogRecords, Closeable {
         return written;
     }
 
-    /** Commit all written data to the physical disk. */
+    /**
+     * Commit all written data to the physical disk.
+     */
     public void flush() throws IOException {
         channel.force(true);
     }
 
-    /** Close this record set. */
+    /**
+     * Close this record set.
+     */
     public void close() throws IOException {
         flush();
         trim();
@@ -206,16 +210,18 @@ public class FileLogRecords implements LogRecords, Closeable {
     /**
      * Delete this message set from the filesystem.
      *
-     * @throws IOException if deletion fails due to an I/O error
      * @return {@code true} if the file was deleted by this method; {@code false} if the file could
-     *     not be deleted because it did not exist
+     * not be deleted because it did not exist
+     * @throws IOException if deletion fails due to an I/O error
      */
     public boolean deleteIfExists() throws IOException {
         IOUtils.closeQuietly(channel, "FileChannel");
         return Files.deleteIfExists(file.toPath());
     }
 
-    /** Trim file when close or roll to next file. */
+    /**
+     * Trim file when close or roll to next file.
+     */
     public void trim() throws IOException {
         truncateTo(sizeInBytes());
     }
@@ -337,7 +343,7 @@ public class FileLogRecords implements LogRecords, Closeable {
      * target offset and return its physical position and the size of the message (including log
      * overhead) at the returned offset. If no such offsets are found, return null.
      *
-     * @param targetOffset The offset to search for.
+     * @param targetOffset     The offset to search for.
      * @param startingPosition The starting position in the file to begin searching from.
      */
     public LogOffsetPosition searchForOffsetWithSize(long targetOffset, int startingPosition) {
@@ -359,9 +365,9 @@ public class FileLogRecords implements LogRecords, Closeable {
      *  - recordBatch's offset is greater than or equals to the startingOffset.
      * </pre>
      *
-     * @param targetTimestamp The timestamp to search for.
+     * @param targetTimestamp  The timestamp to search for.
      * @param startingPosition The starting position to search.
-     * @param startingOffset The starting offset to search.
+     * @param startingOffset   The starting offset to search.
      * @return The timestamp and offset of the message found. Null if no message is found.
      */
     public @Nullable TimestampAndOffset searchForTimestamp(
@@ -376,7 +382,9 @@ public class FileLogRecords implements LogRecords, Closeable {
         return null;
     }
 
-    /** Return the largest timestamp after a given position in this file. */
+    /**
+     * Return the largest timestamp after a given position in this file.
+     */
     public TimestampAndOffset largestTimestampAfter(int startPosition) {
         long maxTimestamp = -1L;
         long startOffsetOfMaxTimestamp = -1L;
@@ -437,11 +445,11 @@ public class FileLogRecords implements LogRecords, Closeable {
      * preallocate to true and initFileSize with one value (for example 512 * 1025 *1024 ) can
      * improve the fluss produce performance.
      *
-     * @param file File path
-     * @param mutable mutable
+     * @param file              File path
+     * @param mutable           mutable
      * @param fileAlreadyExists File already exists or not
-     * @param initFileSize The size used for pre allocate file, for example 512 * 1025 *1024
-     * @param preallocate Pre-allocate file or not, gotten from configuration.
+     * @param initFileSize      The size used for pre allocate file, for example 512 * 1025 *1024
+     * @param preallocate       Pre-allocate file or not, gotten from configuration.
      */
     private static FileChannel openChannel(
             File file,

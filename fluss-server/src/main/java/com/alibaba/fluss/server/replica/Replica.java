@@ -87,13 +87,11 @@ import com.alibaba.fluss.utils.CloseableRegistry;
 import com.alibaba.fluss.utils.FlussPaths;
 import com.alibaba.fluss.utils.IOUtils;
 import com.alibaba.fluss.utils.types.Tuple2;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -143,7 +141,9 @@ public final class Replica {
     private final LogManager logManager;
     private final LogTablet logTablet;
     private final long replicaMaxLagTime;
-    /** A closeable registry to register all registered {@link Closeable}s. */
+    /**
+     * A closeable registry to register all registered {@link Closeable}s.
+     */
     private final CloseableRegistry closeableRegistry;
 
     private final int minInSyncReplicas;
@@ -157,7 +157,9 @@ public final class Replica {
 
     private final int localTabletServerId;
     private final DelayedOperationManager<DelayedWrite<?>> delayedWriteManager;
-    /** The manger to manger the isr expand and shrink. */
+    /**
+     * The manger to manger the isr expand and shrink.
+     */
     private final AdjustIsrManager adjustIsrManager;
 
     private final List<String> partitionKeys;
@@ -437,7 +439,9 @@ public final class Replica {
                 });
     }
 
-    /** Delete the replica including drop the kv and log. */
+    /**
+     * Delete the replica including drop the kv and log.
+     */
     public void delete() {
         // need to hold the lock to prevent appendLog, putKv from hitting I/O exceptions due
         // to log/kv being deleted
@@ -888,10 +892,10 @@ public final class Replica {
                     remoteFollowerReplica.stateSnapshot();
             int followerId = remoteFollowerReplica.getFollowerId();
             if (replicaState.getLogEndOffsetMetadata().getMessageOffset()
-                            < newHighWatermark.getMessageOffset()
+                    < newHighWatermark.getMessageOffset()
                     && (isrState.maximalIsr().contains(followerId)
-                            || shouldWaitForReplicaToJoinIsr(
-                                    replicaState, leaderLogEndOffset, currentTimeMs, followerId))) {
+                    || shouldWaitForReplicaToJoinIsr(
+                    replicaState, leaderLogEndOffset, currentTimeMs, followerId))) {
                 newHighWatermark = replicaState.getLogEndOffsetMetadata();
             }
         }
@@ -914,7 +918,7 @@ public final class Replica {
             long currentTimeMs,
             int followerId) {
         return replicaState.isCaughtUp(
-                        leaderLogEndOffset.getMessageOffset(), currentTimeMs, replicaMaxLagTime)
+                leaderLogEndOffset.getMessageOffset(), currentTimeMs, replicaMaxLagTime)
                 && isReplicaIsrEligible(followerId);
     }
 
@@ -1203,7 +1207,9 @@ public final class Replica {
         inReadLock(leaderIsrUpdateLock, () -> logManager.truncateTo(tableBucket, offset));
     }
 
-    /** Delete all data in the local log of this bucket and start the log at the new offset. */
+    /**
+     * Delete all data in the local log of this bucket and start the log at the new offset.
+     */
     public void truncateFullyAndStartAt(long newOffset) {
         inReadLock(
                 leaderIsrUpdateLock,
@@ -1335,6 +1341,7 @@ public final class Replica {
             // Send adjust isr request outside the leaderIsrUpdateLock since the completion
             // logic may increment the high watermark (and consequently complete delayed
             // operations).
+            // 在leaderIsrUpdateLock之外发送调整isr请求，因为完成逻辑可能会增加高水印 (并因此完成延迟操作)。
             adjustIsrUpdateOpt.map(this::submitAdjustIsr);
         }
     }
@@ -1434,7 +1441,7 @@ public final class Replica {
      * Handle a successful 'AdjustIsr' response.
      *
      * @param proposedIsrState The ISR state change that was requested
-     * @param leaderAndIsr The updated LeaderAndIsr state
+     * @param leaderAndIsr     The updated LeaderAndIsr state
      * @return true if the high watermark was successfully incremented following, false otherwise
      */
     private boolean handleAdjustIsrUpdate(
@@ -1484,7 +1491,7 @@ public final class Replica {
      * okay staying in this state until we see new metadata from LeaderAndIsr.
      *
      * @param proposedIsrState The ISR state change that was requested
-     * @param error The error returned from {@link AdjustIsrManager}
+     * @param error            The error returned from {@link AdjustIsrManager}
      * @return true if the `AdjustIsr` request should be retried, false otherwise
      */
     private boolean handleAdjustIsrError(IsrState.PendingIsrState proposedIsrState, Errors error) {

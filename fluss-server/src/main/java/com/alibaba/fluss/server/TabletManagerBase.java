@@ -31,7 +31,6 @@ import com.alibaba.fluss.server.zk.ZooKeeperClient;
 import com.alibaba.fluss.utils.FileUtils;
 import com.alibaba.fluss.utils.FlussPaths;
 import com.alibaba.fluss.utils.concurrent.ExecutorThreadFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +62,9 @@ public abstract class TabletManagerBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(TabletManagerBase.class);
 
-    /** The enum for the tablet type. */
+    /**
+     * The enum for the tablet type.
+     */
     public enum TabletType {
         LOG,
         KV
@@ -76,6 +77,7 @@ public abstract class TabletManagerBase {
     protected final Lock tabletCreationOrDeletionLock = new ReentrantLock();
 
     // TODO make this parameter configurable.
+    // 使此参数可配置。
     private final int recoveryThreads;
     private final TabletType tabletType;
     private final String tabletDirPrefix;
@@ -96,24 +98,30 @@ public abstract class TabletManagerBase {
      * PhysicalTablePath, TableBucket)} and {@link FlussPaths#kvTabletDir(File, PhysicalTablePath,
      * TableBucket)}.
      */
+    // 返回要加载的tablets的目录
     protected List<File> listTabletsToLoad() {
         List<File> tabletsToLoad = new ArrayList<>();
         // Get all database directory.
+        // 获取所有数据库目录。
         File[] dbDirs = FileUtils.listDirectories(dataDir);
         for (File dbDir : dbDirs) {
             // Get all table path directory.
+            // 获取所有表路径目录。
             File[] tableDirs = FileUtils.listDirectories(dbDir);
             for (File tableDir : tableDirs) {
                 // maybe tablet directories or partition directories
+                // 可能是tablet目录或分区目录
                 File[] tabletOrPartitionDirs = FileUtils.listDirectories(tableDir);
 
                 List<File> tabletDirs = new ArrayList<>();
                 for (File tabletOrPartitionDir : tabletOrPartitionDirs) {
                     // if not partition dir, consider it as a tablet dir
+                    // 如果不是分区目录，则将其视为tablet目录
                     if (!isPartitionDir(tabletOrPartitionDir.getName())) {
                         tabletDirs.add(tabletOrPartitionDir);
                     } else {
                         // consider all dirs in partition as tablet dirs
+                        // 将分区中的所有目录视为tablet目录
                         tabletDirs.addAll(
                                 Arrays.asList(FileUtils.listDirectories(tabletOrPartitionDir)));
                     }
@@ -122,6 +130,9 @@ public abstract class TabletManagerBase {
                 // it may contain the directory for kv tablet and log tablet
                 // filter out the directory for specific type tablet
                 // actually it identified by the prefix of the directory
+                //可能包含kv tablet和log tablet的目录
+                //过滤出特定类型tablet的目录
+                //实际上它由目录的前缀标识
                 tabletsToLoad.addAll(
                         tabletDirs.stream()
                                 .filter(
@@ -138,9 +149,13 @@ public abstract class TabletManagerBase {
         return Executors.newFixedThreadPool(recoveryThreads, new ExecutorThreadFactory(poolName));
     }
 
-    /** Running a series of jobs in a thread pool, and return the count of the successful job. */
+    /**
+     * Running a series of jobs in a thread pool, and return the count of the successful job.
+     */
+    // 在线程池中运行一系列作业，并返回成功作业的计数。
     protected int runInThreadPool(Runnable[] runnableJobs, String poolName) throws Throwable {
         List<Future<?>> jobsForTabletDir = new ArrayList<>();
+        // 创建线程池 固定线程无界队列
         ExecutorService pool = createThreadPool(poolName);
         for (Runnable runnable : runnableJobs) {
             jobsForTabletDir.add(pool.submit(runnable));
@@ -167,7 +182,7 @@ public abstract class TabletManagerBase {
      * <p>When the parent directory of the tablet directory is missing, it will create the
      * directory.
      *
-     * @param tablePath the table path of the bucket
+     * @param tablePath   the table path of the bucket
      * @param tableBucket the table bucket
      * @return the tablet directory
      */
@@ -216,7 +231,9 @@ public abstract class TabletManagerBase {
         return ReplicaManager.getTableDescriptor(tablePath, zkClient, schemaInfo.getSchema());
     }
 
-    /** Create a tablet directory in the given dir. */
+    /**
+     * Create a tablet directory in the given dir.
+     */
     protected void createTabletDirectory(File tabletDir) {
         try {
             Files.createDirectories(tabletDir.toPath());

@@ -19,7 +19,6 @@ package com.alibaba.fluss.cluster;
 import com.alibaba.fluss.annotation.Internal;
 
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +36,7 @@ public interface MetadataCache {
      *
      * @return the coordinator server node
      */
+    // 获取coordinator服务器节点。
     @Nullable
     ServerNode getCoordinatorServer();
 
@@ -64,7 +64,9 @@ public interface MetadataCache {
      */
     Map<Integer, ServerNode> getAllAliveTabletServers();
 
-    /** Get ids of all alive tablet server nodes. */
+    /**
+     * Get ids of all alive tablet server nodes.
+     */
     default int[] getLiveServerIds() {
         List<ServerNode> serverNodes = new ArrayList<>(getAllAliveTabletServers().values());
         int[] server = new int[serverNodes.size()];

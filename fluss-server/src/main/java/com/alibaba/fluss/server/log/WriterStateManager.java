@@ -26,12 +26,10 @@ import com.alibaba.fluss.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode
 import com.alibaba.fluss.utils.json.JsonDeserializer;
 import com.alibaba.fluss.utils.json.JsonSerdeUtils;
 import com.alibaba.fluss.utils.json.JsonSerializer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.NotThreadSafe;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -73,6 +71,10 @@ import static com.alibaba.fluss.utils.FlussPaths.writerSnapshotFile;
  * data. However, writer ids can be expired due to lack of recent use or if the last written entry
  * has been deleted from the log (e.g. if the retention policy is "delete").
  */
+// 维护从写入器id到有关最后追加条目的元数据的映射 (例如批处理序列)。
+//批处理序列是成功附加到给定标识符的桶的最后一个数字。
+//只要映射中包含写入器id，对应的写入器就可以继续写入数据。
+// 然而，写入器id可能由于缺少最近的使用或者如果最后写入的条目已经从日志中删除 (例如，如果保留策略是 “删除”) 而过期。
 @NotThreadSafe
 public class WriterStateManager {
     private static final Logger LOG = LoggerFactory.getLogger(WriterStateManager.class);
@@ -82,7 +84,9 @@ public class WriterStateManager {
     private final Map<Long, WriterStateEntry> writers = new HashMap<>();
 
     private final File logTabletDir;
-    /** The same as writers#size, but for lock-free access. */
+    /**
+     * The same as writers#size, but for lock-free access.
+     */
     private volatile int writerIdCount = 0;
 
     private ConcurrentSkipListMap<Long, SnapshotFile> snapshots;
@@ -101,7 +105,9 @@ public class WriterStateManager {
         return writerIdCount;
     }
 
-    /** Returns the last offset of this map. */
+    /**
+     * Returns the last offset of this map.
+     */
     public long mapEndOffset() {
         return lastMapOffset;
     }
@@ -110,12 +116,16 @@ public class WriterStateManager {
         lastMapOffset = lastOffset;
     }
 
-    /** Get the last written entry for the given writer id. */
+    /**
+     * Get the last written entry for the given writer id.
+     */
     public Optional<WriterStateEntry> lastEntry(long writerId) {
         return Optional.ofNullable(writers.get(writerId));
     }
 
-    /** Get a copy of the active writers. */
+    /**
+     * Get a copy of the active writers.
+     */
     public Map<Long, WriterStateEntry> activeWriters() {
         return Collections.unmodifiableMap(writers);
     }
@@ -223,7 +233,9 @@ public class WriterStateManager {
         }
     }
 
-    /** Fetch the snapshot file for the end offset of the log segment. */
+    /**
+     * Fetch the snapshot file for the end offset of the log segment.
+     */
     public Optional<File> fetchSnapshot(long offset) {
         return Optional.ofNullable(snapshots.get(offset)).map(SnapshotFile::file);
     }
@@ -234,7 +246,9 @@ public class WriterStateManager {
         return new WriterAppendInfo(writerId, tableBucket, currentEntry);
     }
 
-    /** Update the mapping with the given append information. */
+    /**
+     * Update the mapping with the given append information.
+     */
     public void update(WriterAppendInfo appendInfo) {
         long writerId = appendInfo.writerId();
         if (writerId == LogRecordBatch.NO_WRITER_ID) {
@@ -266,6 +280,10 @@ public class WriterStateManager {
      * file, but not to remove the largest stray snapshot file which was emitted during clean
      * shutdown.
      */
+    //扫描日志目录，收集所有写入器快照文件。
+    // 将移除不具有与segmentBaseOffsets中提供的偏移之一相对应的偏移的快照文件，
+    // 除非在偏移高于segmentBaseOffsets中的任何偏移的情况下存在快照文件。
+    //这里的目标是删除没有关联段文件的任何快照文件，但不删除在干净关机期间发出的最大杂散快照文件
     public void removeStraySnapshots(Collection<Long> segmentBaseOffsets) throws IOException {
         OptionalLong maxSegmentBaseOffset =
                 segmentBaseOffsets.isEmpty()
@@ -282,6 +300,7 @@ public class WriterStateManager {
                 SnapshotFile prev = latestStraySnapshot.get();
                 if (!baseOffsets.contains(key)) {
                     // this snapshot is now the largest stray snapshot.
+                    // 此快照现在是最大的杂散快照。
                     prev.deleteIfExists();
                     snapshots.remove(prev.offset);
                     latestStraySnapshot = Optional.of(snapshot);
@@ -295,6 +314,7 @@ public class WriterStateManager {
 
         // Check to see if the latestStraySnapshot is larger than the largest segment base offset,
         // if it is not, delete the largestStraySnapshot.
+        // 检查latestStraySnapshot是否大于最大段基偏移量，如果不是，则删除largestStraySnapshot。
         if (latestStraySnapshot.isPresent() && maxSegmentBaseOffset.isPresent()) {
             long strayOffset = latestStraySnapshot.get().offset;
             long maxOffset = maxSegmentBaseOffset.getAsLong();
@@ -341,7 +361,9 @@ public class WriterStateManager {
         }
     }
 
-    /** Load writer state snapshots by scanning the logDir. */
+    /**
+     * Load writer state snapshots by scanning the logDir.
+     */
     private ConcurrentSkipListMap<Long, SnapshotFile> loadSnapshots() throws IOException {
         ConcurrentSkipListMap<Long, SnapshotFile> offsetToSnapshots = new ConcurrentSkipListMap<>();
         List<SnapshotFile> snapshotFiles = listSnapshotFiles(logTabletDir);
@@ -370,7 +392,9 @@ public class WriterStateManager {
         return Optional.ofNullable(snapshots.lastEntry()).map(Map.Entry::getValue);
     }
 
-    /** Get the last offset (exclusive) of the latest snapshot file. */
+    /**
+     * Get the last offset (exclusive) of the latest snapshot file.
+     */
     public Optional<Long> latestSnapshotOffset() {
         Optional<SnapshotFile> snapshotFileOptional = latestSnapshotFile();
         return snapshotFileOptional.map(snapshotFile -> snapshotFile.offset);
@@ -466,8 +490,8 @@ public class WriterStateManager {
         buffer.flip();
 
         try (FileChannel fileChannel =
-                FileChannel.open(
-                        file.toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+                     FileChannel.open(
+                             file.toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
             fileChannel.write(buffer);
             if (sync) {
                 fileChannel.force(true);
@@ -475,7 +499,9 @@ public class WriterStateManager {
         }
     }
 
-    /** Writer snapshot map json serde. */
+    /**
+     * Writer snapshot map json serde.
+     */
     public static class WriterSnapshotMapJsonSerde
             implements JsonSerializer<WriterSnapshotMap>, JsonDeserializer<WriterSnapshotMap> {
         public static final WriterSnapshotMapJsonSerde INSTANCE = new WriterSnapshotMapJsonSerde();
@@ -538,7 +564,9 @@ public class WriterStateManager {
         }
     }
 
-    /** Writer snapshot entry. */
+    /**
+     * Writer snapshot entry.
+     */
     public static class WriterSnapshotEntry {
         public final long writerId;
         public final int lastBatchSequence;
@@ -602,7 +630,9 @@ public class WriterStateManager {
         }
     }
 
-    /** Writer snapshot map. */
+    /**
+     * Writer snapshot map.
+     */
     public static class WriterSnapshotMap {
         // Version of the snapshot file.
         private final List<WriterSnapshotEntry> snapshotEntries;

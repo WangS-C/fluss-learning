@@ -23,7 +23,6 @@ import com.alibaba.fluss.exception.LogStorageException;
 import com.alibaba.fluss.metadata.LogFormat;
 import com.alibaba.fluss.utils.FlussPaths;
 import com.alibaba.fluss.utils.types.Tuple2;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,9 @@ import java.util.Comparator;
  * Software Foundation (ASF) under the Apache License, Version 2.0. See the NOTICE file distributed with this work for
  * additional information regarding copyright ownership. */
 
-/** Loader to load log segments. */
+/**
+ * Loader to load log segments.
+ */
 final class LogLoader {
     private static final Logger LOG = LoggerFactory.getLogger(LogLoader.class);
 
@@ -72,19 +73,26 @@ final class LogLoader {
      *
      * @return the offsets of the Log successfully loaded from disk
      */
+    // 从磁盘上的日志文件加载日志段，并返回已加载日志的组件。
+    //在调用线程的上下文中，此函数不需要将IOException转换为LogStorageException ，因为它仅在加载所有日志之前被调用。
     public LoadedLogOffsets load() throws IOException {
         // load all the log and index files.
+        // 加载所有日志和索引文件。
         logSegments.close();
         logSegments.clear();
+        // 将磁盘中的段加载到logSegments中
         loadSegmentFiles();
         long newRecoveryPoint;
         long nextOffset;
+        // 恢复日志段
         Tuple2<Long, Long> result = recoverLog();
         newRecoveryPoint = result.f0;
         nextOffset = result.f1;
 
         // Any segment loading or recovery code must not use writerStateManager, so that we can
         // build the full state here from scratch.
+        // 任何段加载或恢复代码都不能使用writerStateManager，这样我们就可以从头开始构建完整的状态。
+        // 在日志初始化期间，写入器状态必须为空
         if (!writerStateManager.isEmpty()) {
             throw new IllegalStateException("Writer state must be empty during log initialization");
         }
@@ -92,8 +100,12 @@ final class LogLoader {
         // Reload all snapshots into the WriterStateManager cache, the intermediate
         // WriterStateManager used during log recovery may have deleted some files without the
         // LogLoader.writerStateManager instance witnessing the deletion.
+        // 将所有快照重新加载到WriterStateManager缓存中，日志恢复期间使用的中间WriterStateManager可能已经删除了一些文件，
+        // 而LogLoader.writerStateManager实例没有见证删除。
         writerStateManager.removeStraySnapshots(logSegments.baseOffsets());
         // TODO get the clean shutdown info from LogManager.
+        // 从LogManager获取干净的关机信息。
+        // 重建写入器状态
         LogTablet.rebuildWriterState(writerStateManager, logSegments, 0, nextOffset, true);
 
         LogSegment activeSegment = logSegments.lastSegment().get();
@@ -113,24 +125,34 @@ final class LogLoader {
      *
      * @return a tuple containing (newRecoveryPoint, nextOffset).
      * @throws LogSegmentOffsetOverflowException if we encountered a legacy segment with offset
-     *     overflow
+     *                                           overflow
      */
+    // 恢复日志段 (如果有不干净的关机)。确保至少有一个活动段，并在恢复后返回更新的恢复点和下一个偏移。
+    //此方法不需要将IOException转换为LogStorageException ，因为它仅在加载所有日志之前调用。
     private Tuple2<Long, Long> recoverLog() throws IOException {
         // TODO truncate log to recover maybe unflush segments.
+        // 截断日志以恢复可能取消刷新的段。
         if (logSegments.isEmpty()) {
-            logSegments.add(LogSegment.open(logTabletDir, 0L, conf, logFormat));
+            logSegments.add(
+                    //创建LogSegment
+                    LogSegment.open(logTabletDir, 0L, conf, logFormat));
         }
+        //获取最后Segment的下一条消息的偏移量
         long logEndOffset = logSegments.lastSegment().get().readNextOffset();
         return Tuple2.of(recoveryPointCheckpoint, logEndOffset);
     }
 
-    /** Loads segments from disk into the provided segments. */
+    /**
+     * Loads segments from disk into the provided segments.
+     */
+    // 将磁盘中的段加载到提供的段中。
     private void loadSegmentFiles() throws IOException {
         File[] sortedFiles = logTabletDir.listFiles();
         if (sortedFiles != null) {
             Arrays.sort(sortedFiles, Comparator.comparing(File::getName));
             for (File file : sortedFiles) {
                 if (file.isFile()) {
+                    // 是索引文件
                     if (LocalLog.isIndexFile(file)) {
                         long offset = FlussPaths.offsetFromFile(file);
                         File logFile = FlussPaths.logFile(logTabletDir, offset);
@@ -140,6 +162,7 @@ final class LogLoader {
                                     file.getAbsolutePath());
                             Files.deleteIfExists(file.toPath());
                         }
+                        // 是日志文件
                     } else if (LocalLog.isLogFile(file)) {
                         long baseOffset = FlussPaths.offsetFromFile(file);
                         LogSegment segment =

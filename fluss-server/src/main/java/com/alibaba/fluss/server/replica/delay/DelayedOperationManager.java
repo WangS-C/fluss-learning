@@ -25,7 +25,6 @@ import com.alibaba.fluss.server.utils.timer.Timer;
 import com.alibaba.fluss.server.utils.timer.TimerTask;
 import com.alibaba.fluss.utils.Preconditions;
 import com.alibaba.fluss.utils.concurrent.ShutdownableThread;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,10 @@ import static com.alibaba.fluss.utils.concurrent.LockUtils.inLock;
  * Software Foundation (ASF) under the Apache License, Version 2.0. See the NOTICE file distributed with this work for
  * additional information regarding copyright ownership. */
 
-/** A manager for bookkeeping delay operations with a timeout, and expiring timed out operations. */
+/**
+ * A manager for bookkeeping delay operations with a timeout, and expiring timed out operations.
+ */
+//一个管理员用于簿记具有超时的延迟操作，以及即将到期的超时操作。
 public final class DelayedOperationManager<T extends DelayedOperation> {
     private static final Logger LOG = LoggerFactory.getLogger(DelayedOperationManager.class);
 
@@ -161,7 +163,9 @@ public final class DelayedOperationManager<T extends DelayedOperation> {
         return count;
     }
 
-    /** Return the number of delayed operations in the expiry queue. */
+    /**
+     * Return the number of delayed operations in the expiry queue.
+     */
     public int numDelayed() {
         return timeoutTimer.numOfTimerTasks();
     }
@@ -223,7 +227,8 @@ public final class DelayedOperationManager<T extends DelayedOperation> {
         timeoutTimer.add(
                 new TimerTask(0) {
                     @Override
-                    public void run() {}
+                    public void run() {
+                    }
                 });
         try {
             expirationReaper.awaitShutdown();
@@ -234,7 +239,9 @@ public final class DelayedOperationManager<T extends DelayedOperation> {
         timeoutTimer.shutdown();
     }
 
-    /** A list of operation watching keys. */
+    /**
+     * A list of operation watching keys.
+     */
     private class WatcherList {
         private final Map<Object, Watcher> watchersByKey;
         private final Lock watcherLock;
@@ -253,7 +260,9 @@ public final class DelayedOperationManager<T extends DelayedOperation> {
         }
     }
 
-    /** A linked list of watched delayed operations based on some key. */
+    /**
+     * A linked list of watched delayed operations based on some key.
+     */
     private class Watcher {
         private final Object key;
         private final Queue<T> operations;
@@ -275,12 +284,16 @@ public final class DelayedOperationManager<T extends DelayedOperation> {
             return operations.isEmpty();
         }
 
-        /** Add the element to watch. */
+        /**
+         * Add the element to watch.
+         */
         public void watch(T t) {
             operations.add(t);
         }
 
-        /** traverse the list and try to complete some watched elements. */
+        /**
+         * traverse the list and try to complete some watched elements.
+         */
         public int tryCompletedWatched() {
             int completed = 0;
             Iterator<T> iter = operations.iterator();
@@ -312,7 +325,9 @@ public final class DelayedOperationManager<T extends DelayedOperation> {
             return cancelled;
         }
 
-        /** traverse the list and purge elements that are already completed by others. */
+        /**
+         * traverse the list and purge elements that are already completed by others.
+         */
         public int purgeCompleted() {
             int purged = 0;
             Iterator<T> iter = operations.iterator();
@@ -330,7 +345,9 @@ public final class DelayedOperationManager<T extends DelayedOperation> {
         }
     }
 
-    /** A background reaper to expire delayed operations that have timed out. */
+    /**
+     * A background reaper to expire delayed operations that have timed out.
+     */
     private class ExpiredOperationReaper extends ShutdownableThread {
         public ExpiredOperationReaper() {
             super(String.format("ExpirationReaper-%d-%s", serverId, managerName), false);

@@ -20,7 +20,10 @@ import com.alibaba.fluss.annotation.Internal;
 
 import java.util.Objects;
 
-/** A class to represent the loaded log offsets. */
+/**
+ * A class to represent the loaded log offsets.
+ */
+// 用于表示加载的日志偏移量的类。
 @Internal
 final class LoadedLogOffsets {
     private final long recoveryPoint;
