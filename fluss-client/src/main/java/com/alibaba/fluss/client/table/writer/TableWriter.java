@@ -27,10 +27,11 @@ import com.alibaba.fluss.metadata.TablePath;
 import com.alibaba.fluss.row.InternalRow;
 
 import javax.annotation.Nullable;
-
 import java.util.concurrent.CompletableFuture;
 
-/** A base class for {@link AppendWriter} and {@link UpsertWriter} to write data to table. */
+/**
+ * A base class for {@link AppendWriter} and {@link UpsertWriter} to write data to table.
+ */
 public abstract class TableWriter {
 
     // the table path that the data will write to
@@ -49,8 +50,8 @@ public abstract class TableWriter {
         this.partitionFieldGetter =
                 tableDescriptor.isPartitioned()
                         ? new PartitionGetter(
-                                tableDescriptor.getSchema().toRowType(),
-                                tableDescriptor.getPartitionKeys())
+                        tableDescriptor.getSchema().toRowType(),
+                        tableDescriptor.getPartitionKeys())
                         : null;
         this.metadataUpdater = metadataUpdater;
     }
@@ -82,13 +83,16 @@ public abstract class TableWriter {
 
     protected PhysicalTablePath getPhysicalPath(InternalRow row) {
         // not partitioned table, return the original physical path
+        // 非分区表，返回原始物理路径
         if (partitionFieldGetter == null) {
             return PhysicalTablePath.of(tablePath);
         } else {
             // partitioned table, extract partition from the row
+            // 分区表，从行中提取分区
             String partition = partitionFieldGetter.getPartition(row);
             PhysicalTablePath partitionPath = PhysicalTablePath.of(tablePath, partition);
             // may update partition info
+            // 可更新分区信息
             metadataUpdater.checkAndUpdatePartitionMetadata(partitionPath);
             return partitionPath;
         }

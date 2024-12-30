@@ -44,7 +44,9 @@ import static com.alibaba.fluss.record.LogRecordBatch.NO_WRITER_ID;
 import static com.alibaba.fluss.utils.Preconditions.checkArgument;
 import static com.alibaba.fluss.utils.Preconditions.checkNotNull;
 
-/** Builder for {@link MemoryLogRecords} of log records in {@link LogFormat#ARROW} format. */
+/**
+ * Builder for {@link MemoryLogRecords} of log records in {@link LogFormat#ARROW} format.
+ */
 public class MemoryLogRecordsArrowBuilder implements AutoCloseable {
     private static final int BUILDER_DEFAULT_OFFSET = 0;
 
@@ -108,7 +110,9 @@ public class MemoryLogRecordsArrowBuilder implements AutoCloseable {
                 baseLogOffset, schemaId, CURRENT_LOG_MAGIC_VALUE, arrowWriter, outputView);
     }
 
-    /** Builder with limited write size and the memory segment used to serialize records. */
+    /**
+     * Builder with limited write size and the memory segment used to serialize records.
+     */
     public static MemoryLogRecordsArrowBuilder builder(
             int schemaId, ArrowWriter arrowWriter, AbstractPagedOutputView outputView) {
         return new MemoryLogRecordsArrowBuilder(
@@ -118,12 +122,14 @@ public class MemoryLogRecordsArrowBuilder implements AutoCloseable {
     public void serialize() throws IOException {
         // use CAS to make sure there is only one thread to serialize the arrow batch
         // and only serialize once
+        // 使用 CAS 来确保只有一个线程来序列化箭头批次，并且只序列化一次
         if (serializationLock.compareAndSet(false, true)) {
             if (!isClosed) {
                 throw new IllegalStateException(
                         "Tried to build Arrow batch into memory before it is closed.");
             }
             // serialize the arrow batch to dynamically allocated memory segments
+            // 将箭头批处理序列化为动态分配的内存段
             arrowWriter.serializeToOutputView(
                     pagedOutputView,
                     firstSegment,
@@ -187,7 +193,9 @@ public class MemoryLogRecordsArrowBuilder implements AutoCloseable {
         return bytesView;
     }
 
-    /** Check if the builder is full. */
+    /**
+     * Check if the builder is full.
+     */
     public boolean isFull() {
         return arrowWriter.isFull();
     }

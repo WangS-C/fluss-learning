@@ -89,6 +89,7 @@ public final class LogTablet {
     private final int maxSegmentFileSize;
     private final long logFlushIntervalMessages;
     // A lock that guards all modifications to the localLog.
+    // 保护对 localLog 的所有修改的锁。
     private final Object lock = new Object();
 
     @GuardedBy("lock")
@@ -106,15 +107,20 @@ public final class LogTablet {
 
     // The minimum offset that should be retained in the local log. This is used to ensure that,
     // the offset of kv snapshot should be retained, otherwise, kv recovery will fail.
+    // 应保留在本地日志中的最小偏移量。这是用来确保，kv快照的偏移量应该被保留，否则，kv恢复将失败。
     private volatile long minRetainOffset;
     // tracking the log start offset in remote storage
+    // 跟踪远程存储中的日志起始偏移量
     private volatile long remoteLogStartOffset = Long.MAX_VALUE;
     // tracking the log end offset in remote storage
+    // 跟踪远程存储中的日志结束偏移量
     private volatile long remoteLogEndOffset = -1L;
 
     // tracking the log start/end offset in lakehouse storage
+    // 跟踪 Lakehouse 存储中的日志起始偏移量
     private volatile long lakeTableSnapshotId = -1;
     // note: currently, for primary key table, the log start offset nerve be updated
+    // 注：目前，对于主键表，日志起始偏移量需要更新
     private volatile long lakeLogStartOffset = Long.MAX_VALUE;
     private volatile long lakeLogEndOffset = -1L;
 
@@ -179,6 +185,9 @@ public final class LogTablet {
         // since currently, we don't support client read changelog directly
         // todo: should support to read from changelog directly, so that
         // we can read changelog directly
+        // 目前，如果是更改日志，我们无法从lakehouse获取日志，因为
+        // 因为目前我们不支持客户端直接读取更新日志
+        // 应支持直接读取更新日志，以便我们可以直接读取更新日志
         if (isChangeLog) {
             return false;
         }
@@ -192,6 +201,7 @@ public final class LogTablet {
     /**
      * The available start offset of the log tablet, maybe on local log or remote log.
      */
+    // 日志片的可用起始偏移量，可能在本地日志或远程日志上。
     public long logStartOffset() {
         return Math.min(Math.min(localLogStartOffset(), remoteLogStartOffset), lakeLogStartOffset);
     }

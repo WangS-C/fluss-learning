@@ -207,6 +207,8 @@ public final class LogManager extends TabletManagerBase {
      * @param tieredLogLocalSegments the number of segments to retain in local for tiered log
      * @param isChangelog            whether the log is a changelog of primary key table
      */
+    // 获取或创建表的给定存储桶的日志表。
+    // 如果日志已经存在，则仅返回现有日志的副本。否则，为给定表和给定存储桶创建日志
     public LogTablet getOrCreateLog(
             PhysicalTablePath tablePath,
             TableBucket tableBucket,
@@ -293,9 +295,11 @@ public final class LogManager extends TabletManagerBase {
      * Truncate the bucket's logs to the specified offsets and checkpoint the recovery point to this
      * offset.
      */
+    // 将存储桶的日志截断到指定的偏移量，并将恢复点检查点到该偏移量
     public void truncateTo(TableBucket tableBucket, long offset) throws LogStorageException {
         LogTablet logTablet = currentLogs.get(tableBucket);
         // If the log tablet does not exist, skip it.
+        // 如果日志片不存在，则跳过。
         if (logTablet != null && logTablet.truncateTo(offset)) {
             checkpointRecoveryOffsets();
         }
@@ -304,6 +308,7 @@ public final class LogManager extends TabletManagerBase {
     public void truncateFullyAndStartAt(TableBucket tableBucket, long newOffset) {
         LogTablet logTablet = currentLogs.get(tableBucket);
         // If the log tablet does not exist, skip it.
+        // 如果日志片不存在，则跳过。
         if (logTablet != null) {
             logTablet.truncateFullyAndStartAt(newOffset);
             checkpointRecoveryOffsets();
@@ -388,6 +393,7 @@ public final class LogManager extends TabletManagerBase {
     /**
      * Close all the logs.
      */
+    // 关闭所有日志。
     public void shutdown() {
         LOG.info("Shutting down LogManager.");
 
@@ -422,6 +428,7 @@ public final class LogManager extends TabletManagerBase {
             }
 
             // update the last flush point.
+            // 更新最后的刷新点。
             checkpointRecoveryOffsets();
 
             // TODO add clean shutdown logic.
@@ -435,6 +442,7 @@ public final class LogManager extends TabletManagerBase {
     @VisibleForTesting
     void checkpointRecoveryOffsets() {
         // Assuming TableBucket and LogTablet are actual types used in your application
+        // 假设 TableBucket 和 LogTablet 是您的应用程序中使用的实际类型
         if (recoveryPointCheckpoint != null) {
             try {
                 Map<TableBucket, Long> recoveryOffsets = new HashMap<>();

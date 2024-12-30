@@ -130,6 +130,11 @@ import static com.alibaba.fluss.utils.concurrent.LockUtils.inWriteLock;
  * <p>For table with pk, it contains a {@link LogTablet} and a {@link KvTablet} if the replica is
  * the leader of the table bucket. For table without pk, it contains only a {@link LogTablet}.
  */
+//表示TableBucket复制品的物理数据结构
+//该类有两个功能：
+// 一个是在一个TableBucket 上执行创建领导者或创建追随者的操作，
+// 另一个是作为LogTablet或KvTablet的入口来操作底层数据。
+//对于有 pk 的表，如果副本是表桶的领导者，则包含LogTablet和KvTablet。对于不带 pk 的表，它只包含一个LogTablet。
 @ThreadSafe
 public final class Replica {
 
@@ -144,6 +149,7 @@ public final class Replica {
     /**
      * A closeable registry to register all registered {@link Closeable}s.
      */
+    // 可关闭注册表，用于注册所有已注册的可关闭设备。
     private final CloseableRegistry closeableRegistry;
 
     private final int minInSyncReplicas;
@@ -153,6 +159,7 @@ public final class Replica {
 
     private final SnapshotContext snapshotContext;
     // null if table without pk
+    // 如果表格没有 pk，则为空
     private final @Nullable KvManager kvManager;
 
     private final int localTabletServerId;
@@ -160,6 +167,7 @@ public final class Replica {
     /**
      * The manger to manger the isr expand and shrink.
      */
+    //Isr 扩大和缩小。
     private final AdjustIsrManager adjustIsrManager;
 
     private final List<String> partitionKeys;
@@ -178,6 +186,8 @@ public final class Replica {
      *
      * <p>followerId -> {@link FollowerReplica}.
      */
+    // 存储远程追随者副本的状态，用于更新领导者的高水印和副本 ISR。
+    // followerId ->FollowerReplica。
     private final Map<Integer, FollowerReplica> followerReplicasMap = new ConcurrentHashMap<>();
 
     private volatile IsrState isrState = new IsrState.CommittedIsrState(Collections.emptyList());
@@ -186,6 +196,7 @@ public final class Replica {
     private volatile int coordinatorEpoch = CoordinatorContext.INITIAL_COORDINATOR_EPOCH;
 
     // null if table without pk or haven't become leader
+    // 如果表格没有 pk 或尚未成为领导，则为空
     private volatile @Nullable KvTablet kvTablet;
     private volatile @Nullable CloseableRegistry closeableRegistryForKv;
 
@@ -232,6 +243,7 @@ public final class Replica {
         this.partitionKeys = tableDescriptor.getPartitionKeys();
         this.snapshotContext = snapshotContext;
         // create a closeable registry for the replica
+        // 为副本创建一个可关闭的注册表
         this.closeableRegistry = new CloseableRegistry();
 
         this.logTablet = createLog(lazyHighWatermarkCheckpoint);
@@ -354,6 +366,7 @@ public final class Replica {
                             long currentTimeMs = System.currentTimeMillis();
                             // Updating the assignment and ISR state is safe if the bucket epoch is
                             // larger or equal to the current bucket epoch.
+                            // 如果桶epoch大于或等于当前桶epoch，则更新分配和 ISR 状态是安全的
                             updateAssignmentAndIsr(data.getReplicas(), true, data.getIsr());
 
                             int requestLeaderEpoch = data.getLeaderEpoch();
@@ -384,10 +397,12 @@ public final class Replica {
                             bucketEpoch = requestBucketEpoch;
 
                             // We may need to increment high watermark since ISR could be down to 1.
+                            // 由于 ISR 可能降至 1，我们可能需要递增高水位标记。
                             return maybeIncrementLeaderHW(logTablet, currentTimeMs);
                         });
 
         // Some delayed operations may be unblocked after HW changed.
+        // 更改硬件后，某些延迟操作可能会解除。
         if (leaderHWIncremented) {
             tryCompleteDelayedOperations();
         }
@@ -442,9 +457,11 @@ public final class Replica {
     /**
      * Delete the replica including drop the kv and log.
      */
+    // 删除副本，包括删除 kv 和日志。
     public void delete() {
         // need to hold the lock to prevent appendLog, putKv from hitting I/O exceptions due
         // to log/kv being deleted
+        // 需要加锁以防止 appendLog、putKv 因 logkv 被删除而发生 IO 异常
         inWriteLock(
                 leaderIsrUpdateLock,
                 () -> {
@@ -494,8 +511,10 @@ public final class Replica {
             // if it's become new leader, we must
             // first destroy the old kv tablet
             // if exist. Otherwise, it'll use still the old kv tablet which will cause data loss
+            // 如果它成为新的领导者，我们必须首先销毁旧的 KV 分片（如果存在）。否则，它仍会使用旧的 kv 分片，导致数据丢失。
             dropKv();
             // now, we can create a new kv tablet
+            // 现在，我们可以创建一个新的 KV 分片
             createKv();
         }
     }
@@ -503,6 +522,7 @@ public final class Replica {
     private void onBecomeNewFollower() {
         if (isKvTable()) {
             // it should be from leader to follower, we need to destroy the kv tablet
+            // 应该是从领导到追随者，我们需要摧毁 KV 片
             dropKv();
         }
     }
@@ -946,6 +966,7 @@ public final class Replica {
         }
 
         // update isr info.
+        // 更新 ISR 信息。
         isrState = new IsrState.CommittedIsrState(isr);
     }
 
@@ -1118,6 +1139,7 @@ public final class Replica {
     public Tuple2<Boolean, Errors> checkEnoughReplicasReachOffset(long requiredOffset) {
         if (isLeader()) {
             // Keep the current immutable replica list reference.
+            // 保留当前不可变副本列表引用。
             List<Integer> curMaximalIsr = isrState.maximalIsr();
             if (LOG.isTraceEnabled()) {
                 traceAckInfo(curMaximalIsr, requiredOffset);
