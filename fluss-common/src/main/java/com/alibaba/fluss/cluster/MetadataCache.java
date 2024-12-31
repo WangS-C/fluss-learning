@@ -62,6 +62,7 @@ public interface MetadataCache {
      *
      * @return all alive tablet server nodes
      */
+    // 获取所有存活的tablet服务器节点。
     Map<Integer, ServerNode> getAllAliveTabletServers();
 
     /**

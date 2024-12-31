@@ -27,6 +27,7 @@ import com.alibaba.fluss.metadata.TablePath;
 import com.alibaba.fluss.row.InternalRow;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -59,9 +60,9 @@ public class AppendWriter extends TableWriter {
      * @param row the row to append.
      * @return A {@link CompletableFuture} that always returns null when complete normally.
      */
-    //将记录添加到 Fluss non-pk 表中。
-    //参数
-    //row- 要追加的行
+    // 将记录添加到 Fluss non-pk 表中。
+    // 参数
+    // row- 要追加的行
     public CompletableFuture<Void> append(InternalRow row) {
         byte[] bucketKey = bucketKeyGetter != null ? bucketKeyGetter.getBucketKey(row) : null;
         return send(new WriteRecord(getPhysicalPath(row), WriteKind.APPEND, row, bucketKey));

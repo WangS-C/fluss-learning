@@ -95,11 +95,13 @@ import com.alibaba.fluss.utils.FileUtils;
 import com.alibaba.fluss.utils.FlussPaths;
 import com.alibaba.fluss.utils.Preconditions;
 import com.alibaba.fluss.utils.concurrent.Scheduler;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -122,9 +124,7 @@ import java.util.stream.Stream;
 import static com.alibaba.fluss.utils.FileUtils.isDirectoryEmpty;
 import static com.alibaba.fluss.utils.concurrent.LockUtils.inLock;
 
-/**
- * A manager for replica.
- */
+/** A manager for replica. */
 // 副本的管理器
 public class ReplicaManager {
     private static final Logger LOG = LoggerFactory.getLogger(ReplicaManager.class);
@@ -152,9 +152,7 @@ public class ReplicaManager {
     private final AdjustIsrManager adjustIsrManager;
     private final FatalErrorHandler fatalErrorHandler;
 
-    /**
-     * epoch of the coordinator that last changed the leader.
-     */
+    /** epoch of the coordinator that last changed the leader. */
     @GuardedBy("replicaStateChangeLock")
     private volatile int coordinatorEpoch = CoordinatorContext.INITIAL_COORDINATOR_EPOCH;
 
@@ -195,7 +193,7 @@ public class ReplicaManager {
                 completedKvSnapshotCommitter,
                 fatalErrorHandler,
                 serverMetricGroup,
-                //新建远程日志管理的入口点
+                // 新建远程日志管理的入口点
                 new RemoteLogManager(conf, zkClient, coordinatorGateway));
     }
 
@@ -246,7 +244,7 @@ public class ReplicaManager {
                         zkClient, completedKvSnapshotCommitter, kvSnapshotResource, conf);
         this.remoteLogManager = remoteLogManager;
         this.serverMetricGroup = serverMetricGroup;
-        //注册指标
+        // 注册指标
         registerMetrics();
     }
 
@@ -414,9 +412,7 @@ public class ReplicaManager {
                 timeoutMs, requiredAcks, entriesPerBucket.size(), kvPutResult, responseCallback);
     }
 
-    /**
-     * Lookup a single key value.
-     */
+    /** Lookup a single key value. */
     @VisibleForTesting
     protected void lookup(TableBucket tableBucket, byte[] key, Consumer<byte[]> responseCallback) {
         multiLookupValues(
@@ -433,9 +429,7 @@ public class ReplicaManager {
                 });
     }
 
-    /**
-     * Multi-lookup from leader replica of the buckets.
-     */
+    /** Multi-lookup from leader replica of the buckets. */
     public void multiLookupValues(
             Map<TableBucket, List<byte[]>> entriesPerBucket,
             Consumer<Map<TableBucket, LookupResultForBucket>> responseCallback) {
@@ -781,9 +775,7 @@ public class ReplicaManager {
         replicaFetcherManager.addFetcherForBuckets(bucketAndStatus);
     }
 
-    /**
-     * Append log records to leader replicas of the buckets.
-     */
+    /** Append log records to leader replicas of the buckets. */
     private Map<TableBucket, ProduceLogResultForBucket> appendToLocalLog(
             Map<TableBucket, MemoryLogRecords> entriesPerBucket, int requiredAcks) {
         Map<TableBucket, ProduceLogResultForBucket> resultForBucketMap = new HashMap<>();
@@ -1078,9 +1070,7 @@ public class ReplicaManager {
         }
     }
 
-    /**
-     * Flushes the high watermark value for all buckets to the high watermark checkpoint file.
-     */
+    /** Flushes the high watermark value for all buckets to the high watermark checkpoint file. */
     @VisibleForTesting
     void checkpointHighWatermarks() {
         List<Replica> onlineReplicasList = getOnlineReplicaList();
@@ -1225,15 +1215,13 @@ public class ReplicaManager {
         // Shrink ISRs for non-offline replicas.
         // 收缩非脱机副本的isr。
         for (Replica replica :
-            // 所有非脱机副本的列表
+                // 所有非脱机副本的列表
                 getOnlineReplicaList()) {
             replica.maybeShrinkIsr();
         }
     }
 
-    /**
-     * Stop the given replica.
-     */
+    /** Stop the given replica. */
     private StopReplicaResultForBucket stopReplica(
             TableBucket tb,
             boolean delete,
@@ -1418,18 +1406,12 @@ public class ReplicaManager {
      * {@link Replica} instance when the TabletServer receives a createLogLeader request or
      * createFollower request from the Coordinator server.
      */
-    public interface HostedReplica {
-    }
+    public interface HostedReplica {}
 
-    /**
-     * This TabletServer does not have any state for this {@link Replica} locally.
-     */
-    public static final class NoneReplica implements HostedReplica {
-    }
+    /** This TabletServer does not have any state for this {@link Replica} locally. */
+    public static final class NoneReplica implements HostedReplica {}
 
-    /**
-     * This TabletServer hosts the {@link Replica} and it is online.
-     */
+    /** This TabletServer hosts the {@link Replica} and it is online. */
     public static final class OnlineReplica implements HostedReplica {
         private final Replica replica;
 
@@ -1442,11 +1424,8 @@ public class ReplicaManager {
         }
     }
 
-    /**
-     * This TabletServer hosts the {@link Replica}, but it is in an offline log directory.
-     */
-    public static final class OfflineReplica implements HostedReplica {
-    }
+    /** This TabletServer hosts the {@link Replica}, but it is in an offline log directory. */
+    public static final class OfflineReplica implements HostedReplica {}
 
     public void shutdown() throws InterruptedException {
         // Close the resources for snapshot kv

@@ -39,6 +39,7 @@ public final class ClientUtils {
     private ClientUtils() {}
 
     // todo: may add DnsLookup
+    // 可添加 DnsLookup
     public static List<InetSocketAddress> parseAndValidateAddresses(List<String> urls) {
         if (urls == null) {
             throw new IllegalConfigurationException(

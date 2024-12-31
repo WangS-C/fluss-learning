@@ -251,6 +251,7 @@ public class MetadataUpdater {
      * Initialize Cluster. This step just to get the coordinator server address and alive tablet
      * servers according to the config {@link ConfigOptions#BOOTSTRAP_SERVERS}.
      */
+    // 初始化群集。这一步只是根据配置ConfigOptions. BOOTSTRAP_SERVERS 获取coordinator服务器地址和存活的tablet服务器。
     private static Cluster initializeCluster(Configuration conf, RpcClient rpcClient) {
         List<InetSocketAddress> inetSocketAddresses =
                 ClientUtils.parseAndValidateAddresses(conf.get(ConfigOptions.BOOTSTRAP_SERVERS));
@@ -281,6 +282,7 @@ public class MetadataUpdater {
                         -1, address.getHostName(), address.getPort(), ServerType.TABLET_SERVER);
         try {
             AdminReadOnlyGateway adminReadOnlyGateway =
+                    // 为给定的网关类创建代理
                     GatewayClientProxy.createGatewayProxy(
                             () -> serverNode, rpcClient, AdminReadOnlyGateway.class);
             return sendMetadataRequestAndRebuildCluster(

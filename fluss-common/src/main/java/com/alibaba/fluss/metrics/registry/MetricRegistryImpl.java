@@ -98,6 +98,7 @@ public class MetricRegistryImpl implements MetricRegistry {
     private void initMetricReporters(Collection<MetricReporter> reporterInstances) {
         if (reporterInstances.isEmpty()) {
             // no reporters defined by default, don't report anything
+            // 默认情况下没有定义报告程序，不报告任何内容
             LOG.info("No metrics reporter configured, no metrics will be exposed/reported.");
             return;
         }
@@ -273,6 +274,7 @@ public class MetricRegistryImpl implements MetricRegistry {
     }
 
     // ------------------------------------------------------------------------
+
     /**
      * This task is explicitly a static class, so that it does not hold any references to the
      * enclosing MetricsRegistry instance.

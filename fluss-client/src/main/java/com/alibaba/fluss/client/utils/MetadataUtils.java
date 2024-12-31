@@ -38,7 +38,6 @@ import com.alibaba.fluss.rpc.messages.PbTableMetadata;
 import com.alibaba.fluss.rpc.messages.PbTablePath;
 
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,7 +47,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-/** Utils for metadata for client. */
+/**
+ * Utils for metadata for client.
+ */
 public class MetadataUtils {
 
     private static final Random randOffset = new Random();
@@ -58,6 +59,8 @@ public class MetadataUtils {
      * cluster, and then send metadata request to request the input tables in tablePaths, after that
      * add those table into cluster.
      */
+    // 完全更新集群，意味着我们将通过清除集群中的所有缓存表来重建集群，
+    // 然后发送元数据请求以请求 tablePaths 中的输入表，之后将这些表添加到集群中。
     public static Cluster sendMetadataRequestAndRebuildCluster(
             AdminReadOnlyGateway gateway, Set<TablePath> tablePaths)
             throws ExecutionException, InterruptedException {
@@ -86,7 +89,10 @@ public class MetadataUtils {
                 gateway, true, cluster, tablePaths, tablePartitionNames, tablePartitionIds);
     }
 
-    /** maybe partial update cluster. */
+    /**
+     * maybe partial update cluster.
+     */
+    // 也许是部分更新集群。
     public static Cluster sendMetadataRequestAndRebuildCluster(
             AdminReadOnlyGateway gateway,
             boolean partialUpdate,
@@ -104,6 +110,7 @@ public class MetadataUtils {
                             ServerNode coordinatorServer = getCoordinatorServer(response);
 
                             // Update the alive table servers.
+                            // 更新存活Tablet服务器。
                             Map<Integer, ServerNode> newAliveTabletServers =
                                     getAliveTabletServers(response);
 
@@ -119,6 +126,7 @@ public class MetadataUtils {
                             if (partialUpdate) {
                                 // If partial update, we will clear the to be updated table out ot
                                 // the origin cluster.
+                                // 如果是部分更新，我们会将待更新表从源群集中清除。
                                 newTablePathToTableId =
                                         new HashMap<>(originCluster.getTableIdByPath());
                                 newTablePathToTableInfo =
@@ -137,6 +145,7 @@ public class MetadataUtils {
                             } else {
                                 // If full update, we will clear all tables info out ot the origin
                                 // cluster.
+                                // 如果完全更新，我们将清除源群集的所有表信息。
                                 newTablePathToTableId = newTableMetadata.tablePathToTableId;
                                 newTablePathToTableInfo = newTableMetadata.tablePathToTableInfo;
                                 newBucketLocations = newTableMetadata.bucketLocations;
@@ -164,10 +173,12 @@ public class MetadataUtils {
         Map<PhysicalTablePath, Long> newPartitionIdByPath = new HashMap<>();
 
         // iterate all table metadata
+        // 遍历所有表元数据
         List<PbTableMetadata> pbTableMetadataList = metadataResponse.getTableMetadatasList();
         pbTableMetadataList.forEach(
                 pbTableMetadata -> {
                     // get table info for the table
+                    // 获取表格的表格信息
                     long tableId = pbTableMetadata.getTableId();
                     PbTablePath protoTablePath = pbTableMetadata.getTablePath();
                     TablePath tablePath =
@@ -186,6 +197,7 @@ public class MetadataUtils {
                                     pbTableMetadata.getSchemaId()));
 
                     // Get all buckets for the table.
+                    // 为表获取所有桶。
                     List<PbBucketMetadata> pbBucketMetadataList =
                             pbTableMetadata.getBucketMetadatasList();
                     newBucketLocations.put(
@@ -203,10 +215,12 @@ public class MetadataUtils {
                 metadataResponse.getPartitionMetadatasList();
 
         // iterate all partition metadata
+        // 遍历所有分区元数据
         pbPartitionMetadataList.forEach(
                 pbPartitionMetadata -> {
                     long tableId = pbPartitionMetadata.getTableId();
                     // the table path should be initialized at begin
+                    // 表路径应在开始时初始化
                     TablePath tablePath = cluster.getTablePathOrElseThrow(tableId);
                     PhysicalTablePath physicalTablePath =
                             PhysicalTablePath.of(tablePath, pbPartitionMetadata.getPartitionName());

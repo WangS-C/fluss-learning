@@ -50,7 +50,9 @@ import com.alibaba.fluss.rpc.protocol.RPC;
 
 import java.util.concurrent.CompletableFuture;
 
-/** The gateway interface between the client and the server for the read-only metadata access. */
+/**
+ * The gateway interface between the client and the server for the read-only metadata access.
+ */
 public interface AdminReadOnlyGateway extends RpcGateway {
 
     // ------ databases ------
@@ -115,6 +117,7 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * @param request Get metadata request
      * @return a future returns metadata
      */
+    // 从服务器获取服务器和表元数据。
     @RPC(api = ApiKeys.GET_METADATA)
     CompletableFuture<MetadataResponse> metadata(MetadataRequest request);
 

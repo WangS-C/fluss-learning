@@ -50,6 +50,8 @@ public class ConnectionFactory {
      *  }
      * }</pre>
      */
+    // 创建与 Fluss 群集的新连接。
+    // 要发现 Fluss 集群，给定配置至少需要包含 "bootstrap. servers"。
     public static Connection createConnection(Configuration conf) {
         return new FlussConnection(conf);
     }
@@ -61,6 +63,8 @@ public class ConnectionFactory {
      *
      * <p>See more comments in method {@link #createConnection(Configuration)}
      */
+    // 创建与 Fluss 集群的新连接，并将度量值注册到给定的metricRegistry。
+    // 它主要用于客户端向外部度量系统注册度量值。
     public static Connection createConnection(Configuration conf, MetricRegistry metricRegistry) {
         return new FlussConnection(conf, metricRegistry);
     }

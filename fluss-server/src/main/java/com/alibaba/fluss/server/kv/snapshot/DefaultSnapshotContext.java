@@ -29,10 +29,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
-/**
- * A default implementation for {@link SnapshotContext}.
- */
-//SnapshotContext的默认实现。
+/** A default implementation for {@link SnapshotContext}. */
+// SnapshotContext的默认实现。
 public class DefaultSnapshotContext implements SnapshotContext {
 
     private final ZooKeeperClient zooKeeperClient;
@@ -45,9 +43,7 @@ public class DefaultSnapshotContext implements SnapshotContext {
 
     private final long kvSnapshotIntervalMs;
 
-    /**
-     * The write buffer size for writing the kv snapshot file to remote filesystem.
-     */
+    /** The write buffer size for writing the kv snapshot file to remote filesystem. */
     private final int writeBufferSizeInBytes;
 
     private final CompletedSnapshotHandleStore completedSnapshotHandleStore;
@@ -143,7 +139,7 @@ public class DefaultSnapshotContext implements SnapshotContext {
 
     @Override
     public FunctionWithException<TableBucket, CompletedSnapshot, Exception>
-    getLatestCompletedSnapshotProvider() {
+            getLatestCompletedSnapshotProvider() {
         return (tableBucket) -> {
             Optional<CompletedSnapshotHandle> optSnapshotHandle =
                     completedSnapshotHandleStore.getLatestCompletedSnapshotHandle(tableBucket);

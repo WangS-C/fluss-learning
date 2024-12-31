@@ -90,12 +90,10 @@ import com.alibaba.fluss.server.zk.data.LakeTableSnapshot;
 import com.alibaba.fluss.server.zk.data.LeaderAndIsr;
 import com.alibaba.fluss.server.zk.data.TableAssignment;
 import com.alibaba.fluss.utils.Preconditions;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -128,7 +126,8 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
     private long tokenLastUpdateTimeMs = 0;
     private ObtainedSecurityToken securityToken = null;
 
-    private @Nullable final LakeStorageInfo lakeStorageInfo;
+    private @Nullable
+    final LakeStorageInfo lakeStorageInfo;
 
     public RpcServiceBase(
             Configuration config,
@@ -229,6 +228,7 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
 
     @Override
     public CompletableFuture<MetadataResponse> metadata(MetadataRequest request) {
+        // 获取所有存活的tablet服务器节点
         Set<ServerNode> aliveTableServers = getAllTabletServerNodes();
         List<PbTablePath> pbTablePaths = request.getTablePathsList();
         List<TablePath> tablePaths = new ArrayList<>(pbTablePaths.size());
@@ -242,25 +242,29 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
         for (PbTablePath pbTablePath : pbTablePaths) {
             TablePath tablePath = toTablePath(pbTablePath);
             tablePaths.add(tablePath);
-            tableMetadataInfos.add(getTableMetadata(tablePath));
+            tableMetadataInfos.add(
+                    //获取 TableMetadataInfo包含tablePath的表信息和physicalTablePaths 的数据桶位置。
+                    getTableMetadata(tablePath));
         }
 
         for (PbPhysicalTablePath partitionPath : partitions) {
             partitionMetadataInfos.add(
+                    //获取表的分区信息。
                     getPartitionMetadata(RpcMessageUtils.toPhysicalTablePath(partitionPath)));
         }
 
         // get partition info from partition ids
+        // 从分区 id 获取分区信息
         partitionMetadataInfos.addAll(getPartitionMetadata(tablePaths, partitionIds));
 
         return CompletableFuture.completedFuture(
                 new ClusterMetadataInfo(
-                                metadataCache.getCoordinatorServer() == null
-                                        ? Optional.empty()
-                                        : Optional.of(metadataCache.getCoordinatorServer()),
-                                aliveTableServers,
-                                tableMetadataInfos,
-                                partitionMetadataInfos)
+                        metadataCache.getCoordinatorServer() == null
+                                ? Optional.empty()
+                                : Optional.of(metadataCache.getCoordinatorServer()),
+                        aliveTableServers,
+                        tableMetadataInfos,
+                        partitionMetadataInfos)
                         .toMetadataResponse());
     }
 
@@ -437,6 +441,7 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
      * Returned a {@link TableMetadataInfo} contains the table info for {@code tablePath} and the
      * bucket locations for {@code physicalTablePaths}.
      */
+    // 返回的TableMetadataInfo包含tablePath的表信息和physicalTablePaths 的数据桶位置。
     private TableMetadataInfo getTableMetadata(TablePath tablePath) {
         TableInfo tableInfo = metadataManager.getTable(tablePath);
         long tableId = tableInfo.getTableId();
@@ -502,6 +507,8 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
         // at least, in current client metadata request design, the assumption is true.
         // but the assumption is fragile; we should use metadata cache to help to get partition by
         // partition ids
+        // 修改逻辑；目前，我们无法直接通过分区 ID 获取分区元数据，
+        // 在这里，我们总是假设分区 ID 必须属于第一个参数 tablePaths；至少，在当前的客户端元数据请求设计中，这一假设是正确的。
 
         List<PartitionMetadataInfo> partitionMetadataInfos = new ArrayList<>();
         Set<Long> partitionIdSet = new HashSet<>();
@@ -515,9 +522,11 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
                 }
                 Set<Long> hitPartitionIds = new HashSet<>();
                 // TODO: this is a heavy operation, should be optimized when we have metadata cache
+                // 这是一项繁重的操作，应该在有元数据缓存时加以优化
                 Map<Long, String> partitionNameById = zkClient.getPartitionIdAndNames(tablePath);
                 for (Long partitionId : partitionIdSet) {
                     // the partition is under the table, get the metadata
+                    // 分区位于表下，获取元数据
                     String partitionName = partitionNameById.get(partitionId);
                     if (partitionName != null) {
                         partitionMetadataInfos.add(
@@ -548,6 +557,7 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
             throws Exception {
         List<BucketLocation> bucketLocations = new ArrayList<>();
         // iterate each bucket assignment
+        // 遍历每个桶分配
         for (Map.Entry<Integer, BucketAssignment> assignment :
                 tableAssignment.getBucketAssignments().entrySet()) {
             int bucketId = assignment.getKey();
@@ -555,6 +565,7 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
 
             List<Integer> replicas = assignment.getValue().getReplicas();
             ServerNode[] replicaNode = new ServerNode[replicas.size()];
+            // 获取所有存活的tablet服务器节点
             Map<Integer, ServerNode> nodes = metadataCache.getAllAliveTabletServers();
             for (int i = 0; i < replicas.size(); i++) {
                 replicaNode[i] =
@@ -562,12 +573,15 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
                                 replicas.get(i),
                                 // if not in alive node, we set host as ""
                                 // and port as -1 just like kafka
+                                // 如果不在活着的节点中，我们会像 kafka 一样将 host 设置为""，将 port 设置为 -1
                                 // TODO: client will not use this node to connect,
                                 //  should be removed in the future.
+                                // 客户端不会使用该节点进行连接，因此今后应删除该节点。
                                 new ServerNode(replicas.get(i), "", -1, ServerType.TABLET_SERVER));
             }
 
             // now get the leader
+            // 现在得到领导
             Optional<LeaderAndIsr> optLeaderAndIsr = zkClient.getLeaderAndIsr(tableBucket);
             ServerNode leader;
             leader =
@@ -587,6 +601,7 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
     private AssignmentInfo getAssignmentInfo(
             @Nullable Long tableId, PhysicalTablePath physicalTablePath) throws Exception {
         // it's a partition, get the partition assignment
+        // 是分区，获取分区分配
         if (physicalTablePath.getPartitionName() != null) {
             Optional<TablePartition> tablePartition =
                     zkClient.getPartition(
@@ -599,6 +614,7 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
 
             return new AssignmentInfo(
                     tablePartition.get().getTableId(),
+                    // 获取 ZK 中的分区分配。
                     zkClient.getPartitionAssignment(partitionId).orElse(null),
                     partitionId);
         } else {
@@ -611,6 +627,7 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
     private static class AssignmentInfo {
         private final long tableId;
         // null then the bucket doesn't belong to a partition. Otherwise, not null
+        // 为空，则桶不属于某个分区。否则，不为空
         private final @Nullable Long partitionId;
         private final @Nullable TableAssignment tableAssignment;
 

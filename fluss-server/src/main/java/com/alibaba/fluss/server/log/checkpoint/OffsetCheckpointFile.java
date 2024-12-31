@@ -19,6 +19,7 @@ package com.alibaba.fluss.server.log.checkpoint;
 import com.alibaba.fluss.annotation.Internal;
 import com.alibaba.fluss.exception.LogStorageException;
 import com.alibaba.fluss.metadata.TableBucket;
+
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -48,12 +49,13 @@ import java.util.regex.Pattern;
  * ----- checkpoint file end  ------
  * </pre>
  */
-//此类将 (Bucket => Offsets) 映射到文件 (对于某个副本)。
+// 此类将 (Bucket => Offsets) 映射到文件 (对于某个副本)。
 //  The format in the offset checkpoint file is like this:
 //  ------ checkpoint file begin -----
 //  0              <- OffsetCheckpointFile. currentVersion
 //  2              <- following entries size
-//  150001 [20241121] 0 10    <- (TableBucket. tableId, [TableBucket. partitionId], TableBucket. bucket, Offset)
+//  150001 [20241121] 0 10    <- (TableBucket. tableId, [TableBucket. partitionId], TableBucket.
+// bucket, Offset)
 //  150001 [20241121] 1 5
 //  ----- checkpoint file end  ------
 @Internal
@@ -100,9 +102,7 @@ public final class OffsetCheckpointFile {
         return result;
     }
 
-    /**
-     * Formatter for offset checkpoint file.
-     */
+    /** Formatter for offset checkpoint file. */
     public static class Formatter
             implements CheckpointFile.EntryFormatter<Pair<TableBucket, Long>> {
 
@@ -144,9 +144,7 @@ public final class OffsetCheckpointFile {
         }
     }
 
-    /**
-     * Loads checkpoint file on demand and caches the offsets for reuse.
-     */
+    /** Loads checkpoint file on demand and caches the offsets for reuse. */
     public static class LazyOffsetCheckpoints {
         private final OffsetCheckpointFile checkpoint;
         private Map<TableBucket, Long> offsets;

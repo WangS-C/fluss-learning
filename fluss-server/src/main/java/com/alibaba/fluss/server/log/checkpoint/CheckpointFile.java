@@ -63,7 +63,7 @@ import java.util.Optional;
 //  entries-count: int
 //  entry-as-string-on-each-line
 //  ========= File end ===============
-//每个条目在检查点文件的每一行上都表示为一个字符串。CheckpointFile. EntryFormatter用于将条目转换为字符串，反之亦然。
+// 每个条目在检查点文件的每一行上都表示为一个字符串。CheckpointFile. EntryFormatter用于将条目转换为字符串，反之亦然。
 @Internal
 public final class CheckpointFile<T> {
     private final int version;
@@ -95,10 +95,10 @@ public final class CheckpointFile<T> {
             // write to temp file and then swap with the existing file
             // 写入临时文件，然后与现有文件交换
             try (FileOutputStream fileOutputStream = new FileOutputStream(tempPath.toFile());
-                 BufferedWriter writer =
-                         new BufferedWriter(
-                                 new OutputStreamWriter(
-                                         fileOutputStream, StandardCharsets.UTF_8))) {
+                    BufferedWriter writer =
+                            new BufferedWriter(
+                                    new OutputStreamWriter(
+                                            fileOutputStream, StandardCharsets.UTF_8))) {
                 CheckpointWriteBuffer<T> checkpointWriteBuffer =
                         new CheckpointWriteBuffer<>(writer, version, formatter);
                 checkpointWriteBuffer.write(entries);
@@ -121,9 +121,7 @@ public final class CheckpointFile<T> {
         }
     }
 
-    /**
-     * This is used to write down the checkpoint entries into a file.
-     */
+    /** This is used to write down the checkpoint entries into a file. */
     // 这用于将检查点条目写入文件中。
     public static class CheckpointWriteBuffer<T> {
         private final BufferedWriter writer;
@@ -154,9 +152,7 @@ public final class CheckpointFile<T> {
         }
     }
 
-    /**
-     * This is used to read the checkpoint entries from a file.
-     */
+    /** This is used to read the checkpoint entries from a file. */
     public static class CheckpointReadBuffer<T> {
 
         private final String location;
@@ -249,8 +245,8 @@ public final class CheckpointFile<T> {
         /**
          * @param value string representation of an entry.
          * @return entry converted from the given string representation if possible. {@link
-         * Optional#empty()} represents that the given string representation could not be
-         * converted into an entry.
+         *     Optional#empty()} represents that the given string representation could not be
+         *     converted into an entry.
          */
         Optional<T> fromString(String value);
     }

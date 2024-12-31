@@ -35,18 +35,18 @@ import com.alibaba.fluss.server.zk.data.TableRegistration;
 import com.alibaba.fluss.shaded.zookeeper3.org.apache.zookeeper.KeeperException;
 import com.alibaba.fluss.utils.function.RunnableWithException;
 import com.alibaba.fluss.utils.function.ThrowingRunnable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-/** A manager for metadata. */
+/**
+ * A manager for metadata.
+ */
 public class MetaDataManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetaDataManager.class);
@@ -159,10 +159,10 @@ public class MetaDataManager {
      * Creates the necessary metadata of the given table in zookeeper and return the table id.
      * Returns -1 if the table already exists and ignoreIfExists is true.
      *
-     * @param tablePath the table path
+     * @param tablePath       the table path
      * @param tableDescriptor the table descriptor
      * @param tableAssignment the table assignment, will be null when the table is partitioned table
-     * @param ignoreIfExists whether to ignore if the table already exists
+     * @param ignoreIfExists  whether to ignore if the table already exists
      * @return the table id
      */
     public long createTable(
@@ -217,6 +217,7 @@ public class MetaDataManager {
     public TableInfo getTable(TablePath tablePath) throws TableNotExistException {
         Optional<TableRegistration> optionalTable;
         try {
+            // 从zk中获取表信息
             optionalTable = zookeeperClient.getTable(tablePath);
         } catch (Exception e) {
             throw new FlussRuntimeException(String.format("Fail to get table '%s'.", tablePath), e);
@@ -224,6 +225,7 @@ public class MetaDataManager {
         if (!optionalTable.isPresent()) {
             throw new TableNotExistException("Table '" + tablePath + "' does not exist.");
         }
+        // 从zk中获取模式信息
         SchemaInfo schemaInfo = getLatestSchema(tablePath);
         TableRegistration tableReg = optionalTable.get();
         return new TableInfo(

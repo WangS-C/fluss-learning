@@ -27,11 +27,10 @@ import com.alibaba.fluss.metadata.TablePath;
 import com.alibaba.fluss.row.InternalRow;
 
 import javax.annotation.Nullable;
+
 import java.util.concurrent.CompletableFuture;
 
-/**
- * A base class for {@link AppendWriter} and {@link UpsertWriter} to write data to table.
- */
+/** A base class for {@link AppendWriter} and {@link UpsertWriter} to write data to table. */
 public abstract class TableWriter {
 
     // the table path that the data will write to
@@ -50,8 +49,8 @@ public abstract class TableWriter {
         this.partitionFieldGetter =
                 tableDescriptor.isPartitioned()
                         ? new PartitionGetter(
-                        tableDescriptor.getSchema().toRowType(),
-                        tableDescriptor.getPartitionKeys())
+                                tableDescriptor.getSchema().toRowType(),
+                                tableDescriptor.getPartitionKeys())
                         : null;
         this.metadataUpdater = metadataUpdater;
     }

@@ -57,6 +57,8 @@ final class FlussConnection implements Connection {
         this.rpcClient = RpcClient.create(conf, clientMetricGroup);
 
         // TODO this maybe remove after we introduce client metadata.
+        // 在我们引入客户元数据后，这个问题可能会被移除。
+        // 构造函数中调用了initializeCluster方法
         this.metadataUpdater = new MetadataUpdater(conf, rpcClient);
         this.writerClient = null;
     }
@@ -110,6 +112,7 @@ final class FlussConnection implements Connection {
         List<String> reporters = conf.get(ConfigOptions.METRICS_REPORTERS);
         if (enableClientMetrics && (reporters == null || reporters.isEmpty())) {
             // Client will use JMX reporter by default if not set.
+            // 如果未设置，客户端将默认使用 JMX 报告器。
             conf.setString(ConfigOptions.METRICS_REPORTERS.key(), "jmx");
         }
     }

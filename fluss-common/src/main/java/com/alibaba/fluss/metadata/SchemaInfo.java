@@ -25,6 +25,9 @@ import com.alibaba.fluss.annotation.Internal;
  *
  * <p>The schema id of each table begins from 1 and is incremented by 1 for each schema change.
  */
+// 模式信息包括模式和模式 ID，模式 ID 代表表模式的唯一标识符。
+// 这可以确保每次模式更改都有唯一的模式标识符。
+//每个表的模式标识符从 1 开始，每次模式变更都递增 1。
 @Internal
 public final class SchemaInfo {
     private final Schema schema;

@@ -44,12 +44,14 @@ import com.alibaba.fluss.utils.Preconditions;
 import com.alibaba.fluss.utils.clock.Clock;
 import com.alibaba.fluss.utils.concurrent.Scheduler;
 import com.alibaba.fluss.utils.types.Either;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -198,9 +200,7 @@ public final class LogTablet {
         return remoteLogStartOffset <= fetchOffset && fetchOffset < remoteLogEndOffset;
     }
 
-    /**
-     * The available start offset of the log tablet, maybe on local log or remote log.
-     */
+    /** The available start offset of the log tablet, maybe on local log or remote log. */
     // 日志片的可用起始偏移量，可能在本地日志或远程日志上。
     public long logStartOffset() {
         return Math.min(Math.min(localLogStartOffset(), remoteLogStartOffset), lakeLogStartOffset);
@@ -293,7 +293,7 @@ public final class LogTablet {
         Files.createDirectories(tabletDir.toPath());
 
         TableBucket tableBucket = FlussPaths.parseTabletDir(tabletDir).f1;
-        //创建 LogSegments
+        // 创建 LogSegments
         LogSegments segments = new LogSegments(tableBucket);
 
         // writerStateManager to store and manager the writer id.
@@ -304,16 +304,16 @@ public final class LogTablet {
                         tabletDir,
                         (int) conf.get(ConfigOptions.WRITER_ID_EXPIRATION_TIME).toMillis());
 
-        //创建LoadedLogOffsets
+        // 创建LoadedLogOffsets
         LoadedLogOffsets offsets =
                 new LogLoader(
-                        tabletDir,
-                        conf,
-                        segments,
-                        recoveryPoint,
-                        logFormat,
-                        writerStateManager)
-                        //从磁盘上的日志文件加载日志段，并返回已加载日志的组件。
+                                tabletDir,
+                                conf,
+                                segments,
+                                recoveryPoint,
+                                logFormat,
+                                writerStateManager)
+                        // 从磁盘上的日志文件加载日志段，并返回已加载日志的组件。
                         .load();
 
         // 创建LocalLog
@@ -339,9 +339,7 @@ public final class LogTablet {
                 clock);
     }
 
-    /**
-     * Register metrics for this log tablet in the metric group.
-     */
+    /** Register metrics for this log tablet in the metric group. */
     public void registerMetrics(BucketMetricGroup bucketMetricGroup) {
         MetricGroup metricGroup = bucketMetricGroup.addGroup("log");
         metricGroup.gauge(
@@ -363,16 +361,12 @@ public final class LogTablet {
         return append(records, true);
     }
 
-    /**
-     * Append this message set to the active segment of the local log without assigning offsets.
-     */
+    /** Append this message set to the active segment of the local log without assigning offsets. */
     public LogAppendInfo appendAsFollower(MemoryLogRecords records) throws Exception {
         return append(records, false);
     }
 
-    /**
-     * Read messages from the local log.
-     */
+    /** Read messages from the local log. */
     public FetchDataInfo read(
             long readOffset,
             int maxLength,
@@ -449,7 +443,7 @@ public final class LogTablet {
             // whenever the log is rolled to a new segment.
             if (oldHighWatermark.getMessageOffset() < newHighWatermark.getMessageOffset()
                     || (oldHighWatermark.getMessageOffset() == newHighWatermark.getMessageOffset()
-                    && oldHighWatermark.onOlderSegment(newHighWatermark))) {
+                            && oldHighWatermark.onOlderSegment(newHighWatermark))) {
                 updateHighWatermarkMetadata(newHighWatermark);
                 return Optional.of(oldHighWatermark);
             } else {
@@ -708,9 +702,7 @@ public final class LogTablet {
         return new AssignResult(initialOffset - 1, commitTimestamp, baseLogOffset);
     }
 
-    /**
-     * Flush all local log segments.
-     */
+    /** Flush all local log segments. */
     public void flush(boolean forceFlushActiveSegment) throws IOException {
         flush(localLog.getLocalLogEndOffset(), forceFlushActiveSegment);
     }
@@ -808,9 +800,7 @@ public final class LogTablet {
         }
     }
 
-    /**
-     * Truncate this log so that it ends with the greatest offset < targetOffset.
-     */
+    /** Truncate this log so that it ends with the greatest offset < targetOffset. */
     boolean truncateTo(long targetOffset) throws LogStorageException {
         if (targetOffset < 0) {
             throw new IllegalArgumentException(
@@ -858,9 +848,7 @@ public final class LogTablet {
         }
     }
 
-    /**
-     * Delete all data in the log and start at the new offset.
-     */
+    /** Delete all data in the log and start at the new offset. */
     void truncateFullyAndStartAt(long newOffset) throws LogStorageException {
         LOG.debug("Truncate and start at offset {}", newOffset);
         synchronized (lock) {
@@ -902,9 +890,7 @@ public final class LogTablet {
         }
     }
 
-    /**
-     * All the log segments in this log ordered from oldest to newest.
-     */
+    /** All the log segments in this log ordered from oldest to newest. */
     public List<LogSegment> logSegments() {
         synchronized (lock) {
             return localLog.getSegments().values();
@@ -993,11 +979,9 @@ public final class LogTablet {
                 monotonic);
     }
 
-    /**
-     * Returns either the duplicated batch metadata (left) or the updated writers (right).
-     */
+    /** Returns either the duplicated batch metadata (left) or the updated writers (right). */
     private Either<WriterStateEntry.BatchMetadata, Collection<WriterAppendInfo>>
-    analyzeAndValidateWriterState(MemoryLogRecords records) {
+            analyzeAndValidateWriterState(MemoryLogRecords records) {
         Map<Long, WriterAppendInfo> updatedWriters = new HashMap<>();
 
         for (LogRecordBatch batch : records.batches()) {
@@ -1066,9 +1050,7 @@ public final class LogTablet {
         }
     }
 
-    /**
-     * Returns the segments that can be deleted by checking log end offset.
-     */
+    /** Returns the segments that can be deleted by checking log end offset. */
     private List<LogSegment> deletableSegments(long endOffset) {
         if (localLog.getSegments().isEmpty()) {
             return Collections.emptyList();
@@ -1139,7 +1121,7 @@ public final class LogTablet {
         // snapshot at the log end offset (see below). The next time the log is reloaded, we will
         // load writer state using this snapshot (or later snapshots). Otherwise, if there is
         // no snapshot file, then we have to rebuild writer state from the first segment.
-        //我们希望在升级tablet服务器时避免不必要的日志扫描以构建写入器状态。
+        // 我们希望在升级tablet服务器时避免不必要的日志扫描以构建写入器状态。
         // 基本的想法是使用没有写入器快照文件来检测升级情况，但是我们必须小心，不要在存在tabletServer故障的情况下假设太多。
         // 我们期望找不到快照的最常见的升级情况如下:
         // 1.tabletServer已经升级，表是新的消息格式，我们有一个干净的关机。

@@ -29,9 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Help class for downloading kv snapshot data files.
- */
+/** Help class for downloading kv snapshot data files. */
 // 用于下载kv快照数据文件的帮助类。
 public class KvSnapshotDataDownloader extends KvSnapshotDataTransfer {
 

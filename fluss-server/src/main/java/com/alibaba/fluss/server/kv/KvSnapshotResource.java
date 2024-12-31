@@ -38,19 +38,15 @@ import java.util.concurrent.TimeUnit;
  *   <li>A uploader to upload snapshot data in the async part of kv snapshot
  * </ul>
  */
-//包含执行kv快照所需的资源。它包含:
-//一个调度器调度快照为kv定期
-//一个线程池的异步部分的kv快照
-//一个上传者上传快照数据在异步部分的kv快
+// 包含执行kv快照所需的资源。它包含:
+// 一个调度器调度快照为kv定期
+// 一个线程池的异步部分的kv快照
+// 一个上传者上传快照数据在异步部分的kv快
 public class KvSnapshotResource {
 
-    /**
-     * A scheduler to schedule kv snapshot.
-     */
+    /** A scheduler to schedule kv snapshot. */
     private final ScheduledExecutorService kvSnapshotScheduler;
-    /**
-     * Thread pool for async snapshot workers.
-     */
+    /** Thread pool for async snapshot workers. */
     private final ExecutorService asyncOperationsThreadPool;
 
     /**
@@ -58,14 +54,10 @@ public class KvSnapshotResource {
      */
     private final ExecutorService snapshotDataTransferService;
 
-    /**
-     * A uploader to upload snapshot data in the async phase of kv snapshot.
-     */
+    /** A uploader to upload snapshot data in the async phase of kv snapshot. */
     private final KvSnapshotDataUploader kvSnapshotDataUploader;
 
-    /**
-     * A downloader to download snapshot data.
-     */
+    /** A downloader to download snapshot data. */
     private final KvSnapshotDataDownloader kvSnapshotDataDownloader;
 
     private KvSnapshotResource(
@@ -117,7 +109,7 @@ public class KvSnapshotResource {
         // the parameter to create thread pool is from Flink. todo: may adjust according Fluss's
         // workload
         // create a thread pool for the async part of kv snapshot
-        //创建线程池的参数来自Flink. 可能会根据Fluss的工作负载进行调整，为kv快照的异步部分创建线程池
+        // 创建线程池的参数来自Flink. 可能会根据Fluss的工作负载进行调整，为kv快照的异步部分创建线程池
         ExecutorService asyncOperationsThreadPool =
                 new ThreadPoolExecutor(
                         0,

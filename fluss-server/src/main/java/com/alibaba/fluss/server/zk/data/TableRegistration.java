@@ -21,7 +21,6 @@ import com.alibaba.fluss.metadata.TableDescriptor;
 import com.alibaba.fluss.metadata.TableInfo;
 
 import javax.annotation.Nullable;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,6 +33,9 @@ import java.util.Objects;
  *
  * @see TableRegistrationJsonSerde for json serialization and deserialization.
  */
+// 表格在ZkData. TableZNode 中的注册信息。它用于在 zookeeper 中存储表信息。
+// 基本上，除了模式部分和模式 ID 外，它还包含与TableInfo相同的信息。
+// 因为模式元数据存储在单独的SchemaZNode 中。
 public class TableRegistration {
 
     public final long tableId;

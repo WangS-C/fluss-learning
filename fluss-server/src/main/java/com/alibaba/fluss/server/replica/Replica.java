@@ -87,11 +87,13 @@ import com.alibaba.fluss.utils.CloseableRegistry;
 import com.alibaba.fluss.utils.FlussPaths;
 import com.alibaba.fluss.utils.IOUtils;
 import com.alibaba.fluss.utils.types.Tuple2;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -130,11 +132,11 @@ import static com.alibaba.fluss.utils.concurrent.LockUtils.inWriteLock;
  * <p>For table with pk, it contains a {@link LogTablet} and a {@link KvTablet} if the replica is
  * the leader of the table bucket. For table without pk, it contains only a {@link LogTablet}.
  */
-//表示TableBucket复制品的物理数据结构
-//该类有两个功能：
+// 表示TableBucket复制品的物理数据结构
+// 该类有两个功能：
 // 一个是在一个TableBucket 上执行创建领导者或创建追随者的操作，
 // 另一个是作为LogTablet或KvTablet的入口来操作底层数据。
-//对于有 pk 的表，如果副本是表桶的领导者，则包含LogTablet和KvTablet。对于不带 pk 的表，它只包含一个LogTablet。
+// 对于有 pk 的表，如果副本是表桶的领导者，则包含LogTablet和KvTablet。对于不带 pk 的表，它只包含一个LogTablet。
 @ThreadSafe
 public final class Replica {
 
@@ -146,9 +148,7 @@ public final class Replica {
     private final LogManager logManager;
     private final LogTablet logTablet;
     private final long replicaMaxLagTime;
-    /**
-     * A closeable registry to register all registered {@link Closeable}s.
-     */
+    /** A closeable registry to register all registered {@link Closeable}s. */
     // 可关闭注册表，用于注册所有已注册的可关闭设备。
     private final CloseableRegistry closeableRegistry;
 
@@ -164,10 +164,8 @@ public final class Replica {
 
     private final int localTabletServerId;
     private final DelayedOperationManager<DelayedWrite<?>> delayedWriteManager;
-    /**
-     * The manger to manger the isr expand and shrink.
-     */
-    //Isr 扩大和缩小。
+    /** The manger to manger the isr expand and shrink. */
+    // Isr 扩大和缩小。
     private final AdjustIsrManager adjustIsrManager;
 
     private final List<String> partitionKeys;
@@ -454,9 +452,7 @@ public final class Replica {
                 });
     }
 
-    /**
-     * Delete the replica including drop the kv and log.
-     */
+    /** Delete the replica including drop the kv and log. */
     // 删除副本，包括删除 kv 和日志。
     public void delete() {
         // need to hold the lock to prevent appendLog, putKv from hitting I/O exceptions due
@@ -912,10 +908,10 @@ public final class Replica {
                     remoteFollowerReplica.stateSnapshot();
             int followerId = remoteFollowerReplica.getFollowerId();
             if (replicaState.getLogEndOffsetMetadata().getMessageOffset()
-                    < newHighWatermark.getMessageOffset()
+                            < newHighWatermark.getMessageOffset()
                     && (isrState.maximalIsr().contains(followerId)
-                    || shouldWaitForReplicaToJoinIsr(
-                    replicaState, leaderLogEndOffset, currentTimeMs, followerId))) {
+                            || shouldWaitForReplicaToJoinIsr(
+                                    replicaState, leaderLogEndOffset, currentTimeMs, followerId))) {
                 newHighWatermark = replicaState.getLogEndOffsetMetadata();
             }
         }
@@ -938,7 +934,7 @@ public final class Replica {
             long currentTimeMs,
             int followerId) {
         return replicaState.isCaughtUp(
-                leaderLogEndOffset.getMessageOffset(), currentTimeMs, replicaMaxLagTime)
+                        leaderLogEndOffset.getMessageOffset(), currentTimeMs, replicaMaxLagTime)
                 && isReplicaIsrEligible(followerId);
     }
 
@@ -1229,9 +1225,7 @@ public final class Replica {
         inReadLock(leaderIsrUpdateLock, () -> logManager.truncateTo(tableBucket, offset));
     }
 
-    /**
-     * Delete all data in the local log of this bucket and start the log at the new offset.
-     */
+    /** Delete all data in the local log of this bucket and start the log at the new offset. */
     public void truncateFullyAndStartAt(long newOffset) {
         inReadLock(
                 leaderIsrUpdateLock,
@@ -1463,7 +1457,7 @@ public final class Replica {
      * Handle a successful 'AdjustIsr' response.
      *
      * @param proposedIsrState The ISR state change that was requested
-     * @param leaderAndIsr     The updated LeaderAndIsr state
+     * @param leaderAndIsr The updated LeaderAndIsr state
      * @return true if the high watermark was successfully incremented following, false otherwise
      */
     private boolean handleAdjustIsrUpdate(
@@ -1513,7 +1507,7 @@ public final class Replica {
      * okay staying in this state until we see new metadata from LeaderAndIsr.
      *
      * @param proposedIsrState The ISR state change that was requested
-     * @param error            The error returned from {@link AdjustIsrManager}
+     * @param error The error returned from {@link AdjustIsrManager}
      * @return true if the `AdjustIsr` request should be retried, false otherwise
      */
     private boolean handleAdjustIsrError(IsrState.PendingIsrState proposedIsrState, Errors error) {

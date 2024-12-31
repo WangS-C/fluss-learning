@@ -23,6 +23,7 @@ import com.alibaba.fluss.exception.LogStorageException;
 import com.alibaba.fluss.metadata.LogFormat;
 import com.alibaba.fluss.utils.FlussPaths;
 import com.alibaba.fluss.utils.types.Tuple2;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +37,7 @@ import java.util.Comparator;
  * Software Foundation (ASF) under the Apache License, Version 2.0. See the NOTICE file distributed with this work for
  * additional information regarding copyright ownership. */
 
-/**
- * Loader to load log segments.
- */
+/** Loader to load log segments. */
 final class LogLoader {
     private static final Logger LOG = LoggerFactory.getLogger(LogLoader.class);
 
@@ -74,7 +73,7 @@ final class LogLoader {
      * @return the offsets of the Log successfully loaded from disk
      */
     // 从磁盘上的日志文件加载日志段，并返回已加载日志的组件。
-    //在调用线程的上下文中，此函数不需要将IOException转换为LogStorageException ，因为它仅在加载所有日志之前被调用。
+    // 在调用线程的上下文中，此函数不需要将IOException转换为LogStorageException ，因为它仅在加载所有日志之前被调用。
     public LoadedLogOffsets load() throws IOException {
         // load all the log and index files.
         // 加载所有日志和索引文件。
@@ -125,26 +124,24 @@ final class LogLoader {
      *
      * @return a tuple containing (newRecoveryPoint, nextOffset).
      * @throws LogSegmentOffsetOverflowException if we encountered a legacy segment with offset
-     *                                           overflow
+     *     overflow
      */
     // 恢复日志段 (如果有不干净的关机)。确保至少有一个活动段，并在恢复后返回更新的恢复点和下一个偏移。
-    //此方法不需要将IOException转换为LogStorageException ，因为它仅在加载所有日志之前调用。
+    // 此方法不需要将IOException转换为LogStorageException ，因为它仅在加载所有日志之前调用。
     private Tuple2<Long, Long> recoverLog() throws IOException {
         // TODO truncate log to recover maybe unflush segments.
         // 截断日志以恢复可能取消刷新的段。
         if (logSegments.isEmpty()) {
             logSegments.add(
-                    //创建LogSegment
+                    // 创建LogSegment
                     LogSegment.open(logTabletDir, 0L, conf, logFormat));
         }
-        //获取最后Segment的下一条消息的偏移量
+        // 获取最后Segment的下一条消息的偏移量
         long logEndOffset = logSegments.lastSegment().get().readNextOffset();
         return Tuple2.of(recoveryPointCheckpoint, logEndOffset);
     }
 
-    /**
-     * Loads segments from disk into the provided segments.
-     */
+    /** Loads segments from disk into the provided segments. */
     // 将磁盘中的段加载到提供的段中。
     private void loadSegmentFiles() throws IOException {
         File[] sortedFiles = logTabletDir.listFiles();

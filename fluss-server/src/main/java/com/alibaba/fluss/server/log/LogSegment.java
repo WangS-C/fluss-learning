@@ -34,11 +34,13 @@ import com.alibaba.fluss.record.TimestampAndOffset;
 import com.alibaba.fluss.shaded.guava32.com.google.common.collect.Iterables;
 import com.alibaba.fluss.utils.FileUtils;
 import com.alibaba.fluss.utils.FlussPaths;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -181,9 +183,7 @@ public final class LogSegment {
         return readMaxTimestampAndStartOffsetSoFar().timestamp;
     }
 
-    /**
-     * Note that this may result in time index materialization.
-     */
+    /** Note that this may result in time index materialization. */
     private long startOffsetOfMaxTimestampSoFar() throws IOException {
         return readMaxTimestampAndStartOffsetSoFar().offset;
     }
@@ -199,9 +199,7 @@ public final class LogSegment {
         return maxTimestampAndStartOffsetSoFar;
     }
 
-    /**
-     * Check whether this segment should roll.
-     */
+    /** Check whether this segment should roll. */
     public boolean shouldRoll(RollParams rollParams) throws IOException {
         return getSizeInBytes() > rollParams.maxSegmentBytes - rollParams.messagesSize
                 || offsetIndex().isFull()
@@ -219,11 +217,11 @@ public final class LogSegment {
      *
      * <p>It is assumed this method is being called from within a lock.
      *
-     * @param largestOffset             The last offset in the message set
-     * @param maxTimestampMs            The max timestamp in the message set.
+     * @param largestOffset The last offset in the message set
+     * @param maxTimestampMs The max timestamp in the message set.
      * @param startOffsetOfMaxTimestamp The start offset of the message that has the max timestamp
-     *                                  in the message to append.
-     * @param records                   The log entries to append.
+     *     in the message to append.
+     * @param records The log entries to append.
      * @throws LogSegmentOffsetOverflowException if the largest offset causes index offset overflow
      */
     public void append(
@@ -374,9 +372,7 @@ public final class LogSegment {
         return bytesTruncated;
     }
 
-    /**
-     * Trim the log and indexes.
-     */
+    /** Trim the log and indexes. */
     public void onBecomeInactiveSegment() throws IOException {
         offsetIndex().trimToValidSize();
         timeIndex().trimToValidSize();
@@ -408,9 +404,7 @@ public final class LogSegment {
         }
     }
 
-    /**
-     * Flush this log segment to disk.
-     */
+    /** Flush this log segment to disk. */
     public void flush() throws IOException {
         fileLogRecords.flush();
         offsetIndex().flush();
@@ -454,13 +448,13 @@ public final class LogSegment {
      * message set will include no more than maxSize bytes and will end before maxOffset if a
      * maxOffset is specified.
      *
-     * @param startOffset   A lower bound on the first offset to include in the message set we read
-     * @param maxSize       The maximum number of bytes to include in the message set we read
-     * @param maxPosition   The maximum position in the log segment that should be exposed for read
+     * @param startOffset A lower bound on the first offset to include in the message set we read
+     * @param maxSize The maximum number of bytes to include in the message set we read
+     * @param maxPosition The maximum position in the log segment that should be exposed for read
      * @param minOneMessage If this is true, the first message will be returned even if it exceeds
-     *                      `maxSize` (if one exists)
+     *     `maxSize` (if one exists)
      * @return The fetched data and the offset metadata of the first message whose offset is >=
-     * startOffset, or null if the startOffset is larger than the largest offset in this log
+     *     startOffset, or null if the startOffset is larger than the largest offset in this log
      */
     @Nullable
     public FetchDataInfo read(
@@ -474,14 +468,14 @@ public final class LogSegment {
      * message set will include no more than maxSize bytes and will end before maxOffset if a
      * maxOffset is specified.
      *
-     * @param startOffset   A lower bound on the first offset to include in the message set we read
-     * @param maxSize       The maximum number of bytes to include in the message set we read
-     * @param maxPosition   The maximum position in the log segment that should be exposed for read
+     * @param startOffset A lower bound on the first offset to include in the message set we read
+     * @param maxSize The maximum number of bytes to include in the message set we read
+     * @param maxPosition The maximum position in the log segment that should be exposed for read
      * @param minOneMessage If this is true, the first message will be returned even if it exceeds
-     *                      `maxSize` (if one exists)
-     * @param projection    The column projection to apply to the log records
+     *     `maxSize` (if one exists)
+     * @param projection The column projection to apply to the log records
      * @return The fetched data and the offset metadata of the first message whose offset is >=
-     * startOffset, or null if the startOffset is larger than the largest offset in this log
+     *     startOffset, or null if the startOffset is larger than the largest offset in this log
      */
     @Nullable
     public FetchDataInfo read(
@@ -602,10 +596,10 @@ public final class LogSegment {
      * need to check on the truncated log and maybe retry or even do the search on another log
      * segment.
      *
-     * @param timestampMs    The timestamp to search for.
+     * @param timestampMs The timestamp to search for.
      * @param startingOffset The starting offset to search.
      * @return the timestamp and baseOffset of the first recordBatch that meets the requirements.
-     * None will be returned if there is no such record.
+     *     None will be returned if there is no such record.
      */
     public Optional<TimestampAndOffset> findOffsetByTimestamp(long timestampMs, long startingOffset)
             throws IOException {

@@ -26,9 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.function.Supplier;
 
-/**
- * Proxy for a {@link RpcGateway} that forwards all method calls to the remote gateway service.
- */
+/** Proxy for a {@link RpcGateway} that forwards all method calls to the remote gateway service. */
 public class GatewayClientProxy implements InvocationHandler {
 
     private final Supplier<ServerNode> nodeSupplier;
@@ -59,7 +57,7 @@ public class GatewayClientProxy implements InvocationHandler {
                 (T)
                         Proxy.newProxyInstance(
                                 classLoader,
-                                new Class<?>[]{gatewayClass},
+                                new Class<?>[] {gatewayClass},
                                 new GatewayClientProxy(nodeSupplier, client));
         return proxy;
     }

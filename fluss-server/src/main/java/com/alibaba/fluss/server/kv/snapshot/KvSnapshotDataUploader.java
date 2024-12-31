@@ -25,6 +25,7 @@ import com.alibaba.fluss.utils.concurrent.FutureUtils;
 import com.alibaba.fluss.utils.function.CheckedSupplier;
 
 import javax.annotation.Nonnull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -36,10 +37,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-/**
- * Help class for uploading Kv snapshot files.
- */
-//上传Kv快照文件的帮助类。
+/** Help class for uploading Kv snapshot files. */
+// 上传Kv快照文件的帮助类。
 public class KvSnapshotDataUploader extends KvSnapshotDataTransfer {
 
     private static final int READ_BUFFER_SIZE = 16 * 1024;

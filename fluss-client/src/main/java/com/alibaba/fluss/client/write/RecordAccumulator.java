@@ -42,10 +42,12 @@ import com.alibaba.fluss.shaded.arrow.org.apache.arrow.memory.BufferAllocator;
 import com.alibaba.fluss.shaded.arrow.org.apache.arrow.memory.RootAllocator;
 import com.alibaba.fluss.utils.CopyOnWriteMap;
 import com.alibaba.fluss.utils.Preconditions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,14 +101,10 @@ public final class RecordAccumulator {
      */
     private final LazyMemorySegmentPool memorySegmentPool;
 
-    /**
-     * The arrow buffer allocator to allocate memory for arrow log write batch.
-     */
+    /** The arrow buffer allocator to allocate memory for arrow log write batch. */
     private final BufferAllocator bufferAllocator;
 
-    /**
-     * The pool of lazily created arrow {@link ArrowWriter}s for arrow log write batch.
-     */
+    /** The pool of lazily created arrow {@link ArrowWriter}s for arrow log write batch. */
     private final ArrowWriterPool arrowWriterPool;
 
     private final ConcurrentMap<PhysicalTablePath, BucketAndWriteBatches> writeBatches =
@@ -171,7 +169,7 @@ public final class RecordAccumulator {
      * <p>The append result will contain the future metadata, and flag for whether the appended
      * batch is full or a new batch is created.
      */
-    //向累加器中添加一条记录，返回追加结果。
+    // 向累加器中添加一条记录，返回追加结果。
     public RecordAppendResult append(
             WriteRecord writeRecord,
             WriteCallback callback,
@@ -286,10 +284,10 @@ public final class RecordAccumulator {
      * same table-node over and over.
      *
      * @param cluster The current cluster metadata
-     * @param nodes   The list of node to drain
+     * @param nodes The list of node to drain
      * @param maxSize The maximum number of bytes to drain
      * @return A list of {@link WriteBatch} for each node specified with total size less than the
-     * requested maxSize.
+     *     requested maxSize.
      */
     public Map<Integer, List<WriteBatch>> drain(Cluster cluster, Set<ServerNode> nodes, int maxSize)
             throws Exception {
@@ -317,9 +315,7 @@ public final class RecordAccumulator {
         }
     }
 
-    /**
-     * Get the deque for the given table-bucket, creating it if necessary.
-     */
+    /** Get the deque for the given table-bucket, creating it if necessary. */
     private Deque<WriteBatch> getOrCreateDeque(
             TableBucket tableBucket, PhysicalTablePath physicalTablePath) {
         BucketAndWriteBatches bucketAndWriteBatches =
@@ -328,9 +324,7 @@ public final class RecordAccumulator {
                 tableBucket.getBucket(), k -> new ArrayDeque<>());
     }
 
-    /**
-     * Check whether there are any batches which haven't been drained.
-     */
+    /** Check whether there are any batches which haven't been drained. */
     public boolean hasUnDrained() {
         for (BucketAndWriteBatches bucketAndWriteBatches : writeBatches.values()) {
             for (Deque<WriteBatch> deque : bucketAndWriteBatches.batches.values()) {
@@ -344,9 +338,7 @@ public final class RecordAccumulator {
         return false;
     }
 
-    /**
-     * Check whether there are any pending batches (whether sent or unsent).
-     */
+    /** Check whether there are any pending batches (whether sent or unsent). */
     public boolean hasIncomplete() {
         return !incomplete.isEmpty();
     }
@@ -359,9 +351,7 @@ public final class RecordAccumulator {
         flushesInProgress.getAndIncrement();
     }
 
-    /**
-     * Mark all buckets as ready to send and block until to send is complete.
-     */
+    /** Mark all buckets as ready to send and block until to send is complete. */
     public void awaitFlushCompletion() throws InterruptedException {
         try {
             // Obtain a copy of all the incomplete write request result(s) at the time of the
@@ -376,9 +366,7 @@ public final class RecordAccumulator {
         }
     }
 
-    /**
-     * Deallocate the record batch.
-     */
+    /** Deallocate the record batch. */
     public void deallocate(WriteBatch batch) {
         incomplete.remove(batch);
         // Only deallocate the batch if it is not a split batch because split batch are allocated
@@ -441,9 +429,7 @@ public final class RecordAccumulator {
         }
     }
 
-    /**
-     * Check whether there are bucket ready for input table.
-     */
+    /** Check whether there are bucket ready for input table. */
     private void bucketReady(
             PhysicalTablePath physicalTablePath,
             BucketAndWriteBatches bucketAndWriteBatches,
@@ -829,15 +815,11 @@ public final class RecordAccumulator {
         }
     }
 
-    /**
-     * Metadata about a record just appended to the record accumulator.
-     */
+    /** Metadata about a record just appended to the record accumulator. */
     public static final class RecordAppendResult {
         public final boolean batchIsFull;
         public final boolean newBatchCreated;
-        /**
-         * Whether this record was abort because the new batch created in record accumulator.
-         */
+        /** Whether this record was abort because the new batch created in record accumulator. */
         public final boolean abortRecordForNewBatch;
 
         public RecordAppendResult(
@@ -848,9 +830,7 @@ public final class RecordAccumulator {
         }
     }
 
-    /**
-     * The set of nodes that have at leader one complete record batch in the accumulator.
-     */
+    /** The set of nodes that have at leader one complete record batch in the accumulator. */
     public static final class ReadyCheckResult {
         public final Set<ServerNode> readyNodes;
         public final Set<PhysicalTablePath> unknownLeaderTables;
@@ -862,9 +842,7 @@ public final class RecordAccumulator {
         }
     }
 
-    /**
-     * Close this accumulator and force all the record buffers to be drained.
-     */
+    /** Close this accumulator and force all the record buffers to be drained. */
     public void close() {
         closed = true;
 
@@ -875,9 +853,7 @@ public final class RecordAccumulator {
         bufferAllocator.close();
     }
 
-    /**
-     * Per table bucket and write batches.
-     */
+    /** Per table bucket and write batches. */
     private static class BucketAndWriteBatches {
         // Write batches for each bucket in queue.
         public final Map<Integer, Deque<WriteBatch>> batches = new CopyOnWriteMap<>();

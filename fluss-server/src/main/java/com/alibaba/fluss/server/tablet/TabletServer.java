@@ -46,11 +46,13 @@ import com.alibaba.fluss.utils.clock.SystemClock;
 import com.alibaba.fluss.utils.concurrent.FlussScheduler;
 import com.alibaba.fluss.utils.concurrent.FutureUtils;
 import com.alibaba.fluss.utils.concurrent.Scheduler;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -79,9 +81,7 @@ public class TabletServer extends ServerBase {
 
     private final int serverId;
 
-    /**
-     * The lock to guard startup / shutdown / manipulation methods.
-     */
+    /** The lock to guard startup / shutdown / manipulation methods. */
     // 锁定保护启动/ 关闭/ 操作方法。
     private final Object lock = new Object();
 
@@ -160,18 +160,18 @@ public class TabletServer extends ServerBase {
             // 启动zk客户端
             this.zkClient = ZooKeeperUtils.startZookeeperClient(conf, this);
 
-            //创建元数据缓存
+            // 创建元数据缓存
             this.metadataCache = new ServerMetadataCacheImpl();
 
             // 创建调度器
             this.scheduler = new FlussScheduler(conf.get(BACKGROUND_THREADS));
-            //启动
+            // 启动
             scheduler.startup();
 
-            //创建LogStore
+            // 创建LogStore
             this.logManager =
                     LogManager.create(conf, zkClient, scheduler, SystemClock.getInstance());
-            //启动
+            // 启动
             logManager.startup();
 
             // 创建KvManager
@@ -183,7 +183,7 @@ public class TabletServer extends ServerBase {
             // rpc客户端向leader副本所在的tablet服务器发送请求以获取日志。
             this.clientMetricGroup =
                     new ClientMetricGroup(metricRegistry, SERVER_NAME + "-" + serverId);
-            //创建可用于向RpcServer发送请求的新RPC客户端。
+            // 创建可用于向RpcServer发送请求的新RPC客户端。
             this.rpcClient = RpcClient.create(conf, clientMetricGroup);
 
             CoordinatorGateway coordinatorGateway =
@@ -208,7 +208,7 @@ public class TabletServer extends ServerBase {
                             DefaultCompletedKvSnapshotCommitter.create(rpcClient, metadataCache),
                             this,
                             tabletServerMetricGroup);
-            //启动
+            // 启动
             replicaManager.startup();
 
             this.tabletService =
@@ -230,10 +230,10 @@ public class TabletServer extends ServerBase {
                             conf.getString(ConfigOptions.TABLET_SERVER_PORT),
                             tabletService,
                             requestsMetrics);
-            //通过绑定到配置的绑定地址和端口 (阻止) 来启动RPC服务器。
+            // 通过绑定到配置的绑定地址和端口 (阻止) 来启动RPC服务器。
             rpcServer.start();
 
-            //注册tablet服务器
+            // 注册tablet服务器
             registerTabletServer();
         }
     }

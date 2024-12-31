@@ -24,19 +24,19 @@ import com.alibaba.fluss.metadata.TableBucket;
 import com.alibaba.fluss.record.LogRecordBatch;
 import com.alibaba.fluss.record.bytesview.BytesView;
 import com.alibaba.fluss.utils.Preconditions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * The abstract write batch contains write callback object to wait write request feedback.
- */
+/** The abstract write batch contains write callback object to wait write request feedback. */
 @Internal
 public abstract class WriteBatch {
     private static final Logger LOG = LoggerFactory.getLogger(WriteBatch.class);
@@ -65,14 +65,14 @@ public abstract class WriteBatch {
      * try to append one write record to the record batch.
      *
      * @param writeRecord the record to write
-     * @param callback    the callback to send back to writer
+     * @param callback the callback to send back to writer
      * @return true if append success, false if the batch is full.
      */
-    //尝试将一条写入记录追加到批记录中。
-    //参数
-    //writeRecord- 要写入的记录 callback- 返回写入器的回调
-    //返回值
-    //如果追加成功则返回 true，如果批次已满则返回 false。
+    // 尝试将一条写入记录追加到批记录中。
+    // 参数
+    // writeRecord- 要写入的记录 callback- 返回写入器的回调
+    // 返回值
+    // 如果追加成功则返回 true，如果批次已满则返回 false。
     public abstract boolean tryAppend(WriteRecord writeRecord, WriteCallback callback)
             throws Exception;
 
@@ -91,7 +91,7 @@ public abstract class WriteBatch {
      * available {@link MemorySegment}s.
      *
      * @return true if the serialization is successful or has been done by {@link #serialize}, false
-     * otherwise.
+     *     otherwise.
      */
     public abstract boolean trySerialize();
 
@@ -101,9 +101,7 @@ public abstract class WriteBatch {
      */
     public abstract BytesView build();
 
-    /**
-     * close the batch.
-     */
+    /** close the batch. */
     public abstract void close() throws Exception;
 
     /**
@@ -176,9 +174,7 @@ public abstract class WriteBatch {
         return drainedMs - createdMs;
     }
 
-    /**
-     * Complete the batch successfully.
-     */
+    /** Complete the batch successfully. */
     public boolean complete() {
         return done(null);
     }
@@ -280,31 +276,23 @@ public abstract class WriteBatch {
         SUCCEEDED
     }
 
-    /**
-     * The type of write batch.
-     */
+    /** The type of write batch. */
     public enum WriteBatchType {
         ARROW_LOG,
         INDEXED_LOG,
         KV
     }
 
-    /**
-     * The future for this batch.
-     */
+    /** The future for this batch. */
     public static class RequestFuture {
         private final CountDownLatch latch = new CountDownLatch(1);
 
-        /**
-         * Mark this request as complete and unblock any threads waiting on its completion.
-         */
+        /** Mark this request as complete and unblock any threads waiting on its completion. */
         public void done() {
             latch.countDown();
         }
 
-        /**
-         * Await the completion of this request.
-         */
+        /** Await the completion of this request. */
         public void await() throws InterruptedException {
             latch.await();
         }

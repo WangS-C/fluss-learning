@@ -31,6 +31,7 @@ import com.alibaba.fluss.server.zk.ZooKeeperClient;
 import com.alibaba.fluss.utils.FileUtils;
 import com.alibaba.fluss.utils.FlussPaths;
 import com.alibaba.fluss.utils.concurrent.ExecutorThreadFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,9 +63,7 @@ public abstract class TabletManagerBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(TabletManagerBase.class);
 
-    /**
-     * The enum for the tablet type.
-     */
+    /** The enum for the tablet type. */
     public enum TabletType {
         LOG,
         KV
@@ -130,9 +129,9 @@ public abstract class TabletManagerBase {
                 // it may contain the directory for kv tablet and log tablet
                 // filter out the directory for specific type tablet
                 // actually it identified by the prefix of the directory
-                //可能包含kv tablet和log tablet的目录
-                //过滤出特定类型tablet的目录
-                //实际上它由目录的前缀标识
+                // 可能包含kv tablet和log tablet的目录
+                // 过滤出特定类型tablet的目录
+                // 实际上它由目录的前缀标识
                 tabletsToLoad.addAll(
                         tabletDirs.stream()
                                 .filter(
@@ -149,9 +148,7 @@ public abstract class TabletManagerBase {
         return Executors.newFixedThreadPool(recoveryThreads, new ExecutorThreadFactory(poolName));
     }
 
-    /**
-     * Running a series of jobs in a thread pool, and return the count of the successful job.
-     */
+    /** Running a series of jobs in a thread pool, and return the count of the successful job. */
     // 在线程池中运行一系列作业，并返回成功作业的计数。
     protected int runInThreadPool(Runnable[] runnableJobs, String poolName) throws Throwable {
         List<Future<?>> jobsForTabletDir = new ArrayList<>();
@@ -182,7 +179,7 @@ public abstract class TabletManagerBase {
      * <p>When the parent directory of the tablet directory is missing, it will create the
      * directory.
      *
-     * @param tablePath   the table path of the bucket
+     * @param tablePath the table path of the bucket
      * @param tableBucket the table bucket
      * @return the tablet directory
      */
@@ -231,9 +228,7 @@ public abstract class TabletManagerBase {
         return ReplicaManager.getTableDescriptor(tablePath, zkClient, schemaInfo.getSchema());
     }
 
-    /**
-     * Create a tablet directory in the given dir.
-     */
+    /** Create a tablet directory in the given dir. */
     protected void createTabletDirectory(File tabletDir) {
         try {
             Files.createDirectories(tabletDir.toPath());

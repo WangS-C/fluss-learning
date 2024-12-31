@@ -36,10 +36,12 @@ import com.alibaba.fluss.rpc.messages.UpdateMetadataRequest;
 import com.alibaba.fluss.rpc.messages.UpdateMetadataResponse;
 import com.alibaba.fluss.server.utils.RpcGatewayManager;
 import com.alibaba.fluss.utils.Preconditions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.NotThreadSafe;
+
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -55,9 +57,7 @@ public class CoordinatorChannelManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoordinatorChannelManager.class);
 
-    /**
-     * A manager for the rpc gateways to tablet servers.
-     */
+    /** A manager for the rpc gateways to tablet servers. */
     // tablet服务器的rpc网关管理器。
     private final RpcGatewayManager<TabletServerGateway> rpcGatewayManager;
 
@@ -97,9 +97,7 @@ public class CoordinatorChannelManager {
                         });
     }
 
-    /**
-     * Send NotifyLeaderAndIsr request to the server and handle the response.
-     */
+    /** Send NotifyLeaderAndIsr request to the server and handle the response. */
     public void sendBucketLeaderAndIsrRequest(
             int receiveServerId,
             NotifyLeaderAndIsrRequest notifyLeaderAndIsrRequest,
@@ -111,9 +109,7 @@ public class CoordinatorChannelManager {
                 responseConsumer);
     }
 
-    /**
-     * Send StopBucketReplicaRequest to the server and handle the response.
-     */
+    /** Send StopBucketReplicaRequest to the server and handle the response. */
     public void sendStopBucketReplicaRequest(
             int receiveServerId,
             StopReplicaRequest stopReplicaRequest,
@@ -125,9 +121,7 @@ public class CoordinatorChannelManager {
                 responseConsumer);
     }
 
-    /**
-     * Send UpdateMetadataRequest to the server and handle the response.
-     */
+    /** Send UpdateMetadataRequest to the server and handle the response. */
     public void sendUpdateMetadataRequest(
             int receiveServerId,
             UpdateMetadataRequest updateMetadataRequest,
@@ -139,9 +133,7 @@ public class CoordinatorChannelManager {
                 responseConsumer);
     }
 
-    /**
-     * Send NotifyRemoteLogOffsetsRequest to the server and handle the response.
-     */
+    /** Send NotifyRemoteLogOffsetsRequest to the server and handle the response. */
     public void sendNotifyRemoteLogOffsetsRequest(
             int receiveServerId,
             NotifyRemoteLogOffsetsRequest notifyRemoteLogOffsetsRequest,
@@ -153,9 +145,7 @@ public class CoordinatorChannelManager {
                 responseConsumer);
     }
 
-    /**
-     * Send NotifyKvSnapshotOffsetRequest to the server and handle the response.
-     */
+    /** Send NotifyKvSnapshotOffsetRequest to the server and handle the response. */
     public void sendNotifyKvSnapshotOffsetRequest(
             int receiveServerId,
             NotifyKvSnapshotOffsetRequest notifySnapshotOffsetRequest,
@@ -201,9 +191,7 @@ public class CoordinatorChannelManager {
         return rpcGatewayManager.getRpcGateway(targetServerId);
     }
 
-    /**
-     * A functional interface to send request via TabletServerGateway.
-     */
+    /** A functional interface to send request via TabletServerGateway. */
     @VisibleForTesting
     @FunctionalInterface
     interface RequestSendFunction<RequestT extends ApiMessage, ResponseT extends ApiMessage> {

@@ -20,6 +20,7 @@ import com.alibaba.fluss.annotation.Internal;
 import com.alibaba.fluss.metadata.TableBucket;
 
 import javax.annotation.concurrent.ThreadSafe;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +74,7 @@ public final class LogSegments {
         }
     }
 
-    /**
-     * Close the handlers for all segments.
-     */
+    /** Close the handlers for all segments. */
     public void closeHandlers() {
         for (LogSegment logSegment : segments.values()) {
             logSegment.closeHandlers();
@@ -119,9 +118,7 @@ public final class LogSegments {
         return Optional.ofNullable(segments.get(offset));
     }
 
-    /**
-     * Returns all the log segments in base offset ascending order.
-     */
+    /** Returns all the log segments in base offset ascending order. */
     public List<LogSegment> values() {
         return new ArrayList<>(segments.values());
     }
@@ -130,7 +127,7 @@ public final class LogSegments {
      * Get log segments in the range [from, to).
      *
      * @param from the start offset
-     * @param to   the end offset
+     * @param to the end offset
      * @return the log segments in the range [from, to)
      */
     public List<LogSegment> values(long from, long to) {
@@ -164,7 +161,7 @@ public final class LogSegments {
 
     /**
      * @return the entry associated with the greatest offset less than or equal to the given offset,
-     * if it exists.
+     *     if it exists.
      */
     private Optional<Map.Entry<Long, LogSegment>> floorEntry(long offset) {
         return Optional.ofNullable(segments.floorEntry(offset));
@@ -172,37 +169,29 @@ public final class LogSegments {
 
     /**
      * @return the log segment with the greatest offset less than or equal to the given offset, if
-     * it exists.
+     *     it exists.
      */
     public Optional<LogSegment> floorSegment(long offset) {
         return floorEntry(offset).map(Map.Entry::getValue);
     }
 
-    /**
-     * @return the entry associated with the greatest offset, if it exists.
-     */
+    /** @return the entry associated with the greatest offset, if it exists. */
     public Optional<Map.Entry<Long, LogSegment>> lastEntry() {
         return Optional.ofNullable(segments.lastEntry());
     }
 
-    /**
-     * @return the log segment with the greatest offset, if it exists.
-     */
+    /** @return the log segment with the greatest offset, if it exists. */
     // 具有最大偏移量的日志段 (如果存在)。
     public Optional<LogSegment> lastSegment() {
         return Optional.ofNullable(segments.lastEntry()).map(Map.Entry::getValue);
     }
 
-    /**
-     * @return the entry associated with the greatest offset, if it exists.
-     */
+    /** @return the entry associated with the greatest offset, if it exists. */
     public Optional<Map.Entry<Long, LogSegment>> firstEntry() {
         return Optional.ofNullable(segments.firstEntry());
     }
 
-    /**
-     * @return the log segment with the greatest offset, if it exists.
-     */
+    /** @return the log segment with the greatest offset, if it exists. */
     public Optional<LogSegment> firstSegment() {
         return Optional.ofNullable(segments.firstEntry()).map(Map.Entry::getValue);
     }
@@ -216,7 +205,7 @@ public final class LogSegments {
 
     /**
      * @return the entry associated with the greatest offset strictly less than the given offset, if
-     * it exists.
+     *     it exists.
      */
     private Optional<Map.Entry<Long, LogSegment>> lowerEntry(long offset) {
         return Optional.ofNullable(segments.lowerEntry(offset));
@@ -224,7 +213,7 @@ public final class LogSegments {
 
     /**
      * @return the log segment with the greatest offset strictly less than the given offset, if it
-     * exists.
+     *     exists.
      */
     public Optional<LogSegment> lowerSegment(long offset) {
         return lowerEntry(offset).map(Map.Entry::getValue);
@@ -232,7 +221,7 @@ public final class LogSegments {
 
     /**
      * @return the entry associated with the smallest offset strictly greater than the given offset,
-     * if it exists.
+     *     if it exists.
      */
     public Optional<Map.Entry<Long, LogSegment>> higherEntry(long offset) {
         return Optional.ofNullable(segments.higherEntry(offset));
@@ -240,7 +229,7 @@ public final class LogSegments {
 
     /**
      * @return the log segment with the smallest offset strictly greater than the given offset, if
-     * it exists.
+     *     it exists.
      */
     public Optional<LogSegment> higherSegment(long offset) {
         return higherEntry(offset).map(Map.Entry::getValue);
@@ -248,7 +237,7 @@ public final class LogSegments {
 
     /**
      * @return an iterable with log segments ordered from the lowest base offset to highest, each
-     * segment returned has a base offset strictly greater than the provided baseOffset.
+     *     segment returned has a base offset strictly greater than the provided baseOffset.
      */
     public List<LogSegment> higherSegments(long baseOffset) {
         if (segments.higherKey(baseOffset) == null) {
@@ -259,9 +248,7 @@ public final class LogSegments {
         return new ArrayList<>(higherMap.values());
     }
 
-    /**
-     * The active segment that is currently taking appends.
-     */
+    /** The active segment that is currently taking appends. */
     public LogSegment activeSegment() {
         return lastSegment().get();
     }

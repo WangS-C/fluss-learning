@@ -33,10 +33,12 @@ import com.alibaba.fluss.utils.IOUtils;
 import com.alibaba.fluss.utils.clock.Clock;
 import com.alibaba.fluss.utils.clock.SystemClock;
 import com.alibaba.fluss.utils.concurrent.ExecutorThreadFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -60,8 +62,8 @@ import java.util.stream.Collectors;
  *
  * <p>This class is thread safe.
  */
-//远程日志管理的入口点。远程日志管理器负责管理从本地日志段到远程日志段的日志分层，使远程日志段过期，并提供api以获取有关远程日志段的日志索引和元数据。
-//此类是线程安全的。
+// 远程日志管理的入口点。远程日志管理器负责管理从本地日志段到远程日志段的日志分层，使远程日志段过期，并提供api以获取有关远程日志段的日志索引和元数据。
+// 此类是线程安全的。
 @ThreadSafe
 public class RemoteLogManager implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteLogManager.class);
@@ -124,9 +126,7 @@ public class RemoteLogManager implements Closeable {
         return remoteLogStorage.getRemoteLogDir();
     }
 
-    /**
-     * Restore the remote log manifest and start the log tiering task for the given replica.
-     */
+    /** Restore the remote log manifest and start the log tiering task for the given replica. */
     public void startLogTiering(Replica replica) throws Exception {
         if (remoteDisabled()) {
             return;
@@ -156,9 +156,7 @@ public class RemoteLogManager implements Closeable {
         LOG.debug("Added the remote log tiering task for replica {}", tableBucket);
     }
 
-    /**
-     * Stop the log tiering task for the given replica.
-     */
+    /** Stop the log tiering task for the given replica. */
     public void stopLogTiering(Replica replica) {
         if (remoteDisabled()) {
             return;
@@ -207,9 +205,7 @@ public class RemoteLogManager implements Closeable {
         }
     }
 
-    /**
-     * Get the position of the given offset in the remote log segment.
-     */
+    /** Get the position of the given offset in the remote log segment. */
     public int lookupPositionForOffset(RemoteLogSegment remoteLogSegment, long offset) {
         return remoteLogIndexCache.lookupPosition(remoteLogSegment, offset);
     }

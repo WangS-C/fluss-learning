@@ -214,6 +214,7 @@ public class ZooKeeperClient implements AutoCloseable {
     /**
      * Get the partition assignment in ZK.
      */
+    // 获取 ZK 中的分区分配。
     public Optional<PartitionAssignment> getPartitionAssignment(long partitionId) throws Exception {
         Optional<byte[]> bytes = getOrEmpty(PartitionIdZNode.path(partitionId));
         return bytes.map(PartitionIdZNode::decode);
@@ -258,6 +259,7 @@ public class ZooKeeperClient implements AutoCloseable {
     /**
      * Get the bucket LeaderAndIsr in ZK.
      */
+    // 在 ZK 中获取桶 LeaderAndIsr。
     public Optional<LeaderAndIsr> getLeaderAndIsr(TableBucket tableBucket) throws Exception {
         Optional<byte[]> bytes = getOrEmpty(LeaderAndIsrZNode.path(tableBucket));
         return bytes.map(LeaderAndIsrZNode::decode);
@@ -420,6 +422,7 @@ public class ZooKeeperClient implements AutoCloseable {
     /**
      * Get the id and name for the partitions of a table in ZK.
      */
+    // 获取 ZK 表中分区的 ID 和名称。
     public Map<Long, String> getPartitionIdAndNames(TablePath tablePath) throws Exception {
         Map<Long, String> partitionIdAndNames = new HashMap<>();
         for (String partitionName : getPartitions(tablePath)) {

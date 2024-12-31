@@ -27,6 +27,7 @@ import java.util.Objects;
  *
  * @since 0.2
  */
+// 用于标识表分区的类，包含表 id 和分区 id。
 @PublicEvolving
 public class TablePartition {
 

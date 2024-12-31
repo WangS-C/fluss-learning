@@ -20,6 +20,7 @@ import com.alibaba.fluss.metadata.TableBucket;
 import com.alibaba.fluss.server.zk.ZooKeeperClient;
 import com.alibaba.fluss.server.zk.data.BucketSnapshot;
 import com.alibaba.fluss.utils.types.Tuple2;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ import static com.alibaba.fluss.utils.Preconditions.checkNotNull;
  * state can grow to multiple MBs.
  */
 // 类将快照的句柄存储到ZooKeeper。
-//注意: 我们只将完成的快照句柄 (完成快照的路径) 存储到zookeeper，而不是整个CompletedSnapshot对象。
+// 注意: 我们只将完成的快照句柄 (完成快照的路径) 存储到zookeeper，而不是整个CompletedSnapshot对象。
 // 这种间接级别对于保持ZooKeeper中的数据量较小是必要的。ZooKeeper是为KB范围内的数据构建的，而state可以增长到多个mb。
 public class ZooKeeperCompletedSnapshotHandleStore implements CompletedSnapshotHandleStore {
 

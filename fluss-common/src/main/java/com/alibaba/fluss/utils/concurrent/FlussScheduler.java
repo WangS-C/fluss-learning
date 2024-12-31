@@ -18,6 +18,7 @@ package com.alibaba.fluss.utils.concurrent;
 
 import com.alibaba.fluss.annotation.Internal;
 import com.alibaba.fluss.annotation.VisibleForTesting;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>It has a pool of fluss-scheduler- threads that do the actual work.
  */
 // 基于ScheduledThreadPoolExecutor的调度程序。
-//它有一个执行实际工作的 fluss-scheduler-threads 池。
+// 它有一个执行实际工作的 fluss-scheduler-threads 池。
 @Internal
 public class FlussScheduler implements Scheduler {
 

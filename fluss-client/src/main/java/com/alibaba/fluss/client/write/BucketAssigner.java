@@ -22,16 +22,14 @@ import com.alibaba.fluss.row.InternalRow;
 
 import javax.annotation.Nullable;
 
-/**
- * Bucket assigner interface.
- */
+/** Bucket assigner interface. */
 @Internal
 public interface BucketAssigner {
 
     /**
      * Assign the bucket for the given key. The key may be null.
      *
-     * @param key     the key
+     * @param key the key
      * @param cluster the cluster
      * @return the bucket id
      * @deprecated use {@link #assignBucket(byte[], InternalRow, Cluster)} instead.
@@ -45,8 +43,8 @@ public interface BucketAssigner {
      * <p>TODO: use {@link com.alibaba.fluss.row.BinaryRow} for the bucket key to replace byte[] and
      * row parameters.
      *
-     * @param key     the key
-     * @param row     the row
+     * @param key the key
+     * @param row the row
      * @param cluster the cluster
      * @return the bucket id
      */
@@ -65,14 +63,11 @@ public interface BucketAssigner {
      * Notifies the bucket assigner a new batch is about to be created. When using the sticky bucket
      * assigner, this method can change the chosen sticky bucket for the new batch.
      *
-     * @param cluster      The current cluster metadata
+     * @param cluster The current cluster metadata
      * @param prevBucketId The bucket previously selected for the record that triggered a new batch
      */
-    default void onNewBatch(Cluster cluster, int prevBucketId) {
-    }
+    default void onNewBatch(Cluster cluster, int prevBucketId) {}
 
-    /**
-     * This is called when bucket assigner is closed.
-     */
+    /** This is called when bucket assigner is closed. */
     void close();
 }

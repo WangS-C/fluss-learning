@@ -34,10 +34,12 @@ import com.alibaba.fluss.rpc.gateway.TabletServerGateway;
 import com.alibaba.fluss.rpc.metrics.ClientMetricGroup;
 import com.alibaba.fluss.utils.CopyOnWriteMap;
 import com.alibaba.fluss.utils.concurrent.ExecutorThreadFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +115,7 @@ public class WriterClient {
      * Asynchronously send a record to a table and invoke the provided callback when to send has
      * been acknowledged.
      */
-    //异步向表中发送记录，并在发送被确认后调用提供的回调。
+    // 异步向表中发送记录，并在发送被确认后调用提供的回调。
     public void send(WriteRecord record, WriteCallback callback) {
         doSend(record, callback);
     }
@@ -148,7 +150,7 @@ public class WriterClient {
         try {
             throwIfWriterClosed();
 
-            //确保记录大小有效
+            // 确保记录大小有效
             ensureValidRecordSize(record.getEstimatedSizeInBytes());
 
             // maybe create bucket assigner.
@@ -166,11 +168,11 @@ public class WriterClient {
                     // 分配桶
                     bucketAssigner.assignBucket(record.getBucketKey(), record.getRow(), cluster);
             RecordAppendResult result =
-                    //向累加器中添加一条记录，返回追加结果
+                    // 向累加器中添加一条记录，返回追加结果
                     accumulator.append(
                             record, callback, cluster, bucketId, bucketAssigner.abortIfBatchFull());
 
-            //为新批次中止记录
+            // 为新批次中止记录
             if (result.abortRecordForNewBatch) {
                 int prevBucketId = bucketId;
                 bucketAssigner.onNewBatch(cluster, prevBucketId);
@@ -197,10 +199,8 @@ public class WriterClient {
         }
     }
 
-    /**
-     * Validate that the record size isn't too large.
-     */
-    //验证记录大小是否过大。
+    /** Validate that the record size isn't too large. */
+    // 验证记录大小是否过大。
     private void ensureValidRecordSize(int size) {
         if (size > totalMemorySize) {
             throw new RecordTooLargeException(
@@ -229,7 +229,7 @@ public class WriterClient {
                 conf.getInt(ConfigOptions.CLIENT_WRITER_MAX_INFLIGHT_REQUESTS_PER_BUCKET);
         if (idempotenceEnabled
                 && maxInflightRequestPerBucket
-                > MAX_IN_FLIGHT_REQUESTS_PER_BUCKET_FOR_IDEMPOTENCE) {
+                        > MAX_IN_FLIGHT_REQUESTS_PER_BUCKET_FOR_IDEMPOTENCE) {
             throw new IllegalConfigurationException(
                     "The value of "
                             + ConfigOptions.CLIENT_WRITER_MAX_INFLIGHT_REQUESTS_PER_BUCKET.key()

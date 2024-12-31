@@ -34,7 +34,7 @@ public interface RpcClient extends AutoCloseable {
     /**
      * Create a new RPC client that can be used to send requests to the {@link RpcServer}.
      *
-     * @param conf              The configuration to use.
+     * @param conf The configuration to use.
      * @param clientMetricGroup The client metric group
      * @return The RPC client.
      */

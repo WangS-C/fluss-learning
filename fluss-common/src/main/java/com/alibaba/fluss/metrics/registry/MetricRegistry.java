@@ -65,6 +65,7 @@ public interface MetricRegistry extends AutoCloseableAsync {
      * @param pluginManager the plugin manager to find the reporters, be null if not in a server
      *     environment.
      */
+    // 根据给定配置创建一个 MetricRegistry。如果没有配置报告器，则返回 NOP 注册表。
     static MetricRegistry create(
             Configuration configuration, @Nullable PluginManager pluginManager) {
         List<MetricReporter> metricReporters =

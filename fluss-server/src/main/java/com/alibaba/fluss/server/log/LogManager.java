@@ -34,10 +34,12 @@ import com.alibaba.fluss.utils.FlussPaths;
 import com.alibaba.fluss.utils.clock.Clock;
 import com.alibaba.fluss.utils.concurrent.Scheduler;
 import com.alibaba.fluss.utils.types.Tuple2;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -116,7 +118,7 @@ public final class LogManager extends TabletManagerBase {
     }
 
     public void startup() {
-        //恢复并加载给定数据目录中的所有日志。
+        // 恢复并加载给定数据目录中的所有日志。
         loadLogs();
 
         // TODO add more scheduler, like log-flusher etc.
@@ -132,9 +134,7 @@ public final class LogManager extends TabletManagerBase {
                 new OffsetCheckpointFile(new File(dataDir, RECOVERY_POINT_CHECKPOINT_FILE));
     }
 
-    /**
-     * Recover and load all logs in the given data directories.
-     */
+    /** Recover and load all logs in the given data directories. */
     // 恢复并加载给定数据目录中的所有日志。
     private void loadLogs() {
         LOG.info("Loading logs from dir {}", dataDir);
@@ -183,7 +183,7 @@ public final class LogManager extends TabletManagerBase {
 
             long startTime = System.currentTimeMillis();
 
-            //在线程池中运行loadLog方法，并返回成功作业的计数。
+            // 在线程池中运行loadLog方法，并返回成功作业的计数。
             int successLoadCount =
                     runInThreadPool(jobsForDir, "log-recovery-" + dataDirAbsolutePath);
 
@@ -201,11 +201,11 @@ public final class LogManager extends TabletManagerBase {
      * return a copy of the existing log. Otherwise, create a log for the given table and the given
      * bucket.
      *
-     * @param tablePath              the table path of the bucket belongs to
-     * @param tableBucket            the table bucket
-     * @param logFormat              the log format
+     * @param tablePath the table path of the bucket belongs to
+     * @param tableBucket the table bucket
+     * @param logFormat the log format
      * @param tieredLogLocalSegments the number of segments to retain in local for tiered log
-     * @param isChangelog            whether the log is a changelog of primary key table
+     * @param isChangelog whether the log is a changelog of primary key table
      */
     // 获取或创建表的给定存储桶的日志表。
     // 如果日志已经存在，则仅返回现有日志的副本。否则，为给定表和给定存储桶创建日志
@@ -321,13 +321,13 @@ public final class LogManager extends TabletManagerBase {
         // 从给定的 (log/ kv) tablet目录解析表路径、可选分区名称和存储桶id。
         Tuple2<PhysicalTablePath, TableBucket> pathAndBucket = FlussPaths.parseTabletDir(tabletDir);
         TableBucket tableBucket = pathAndBucket.f1;
-        //获取日志恢复点
+        // 获取日志恢复点
         long logRecoveryPoint = recoveryPoints.getOrDefault(tableBucket, 0L);
 
         PhysicalTablePath physicalTablePath = pathAndBucket.f0;
         TablePath tablePath = physicalTablePath.getTablePath();
         TableDescriptor tableDescriptor =
-                //获取表描述符和schema 目前是从zk获取 后续会存储至磁盘 【FLUSS-58283612】
+                // 获取表描述符和schema 目前是从zk获取 后续会存储至磁盘 【FLUSS-58283612】
                 getTableDescriptor(zkClient, tablePath, tableBucket, tabletDir);
         LogTablet logTablet =
                 LogTablet.create(
@@ -390,9 +390,7 @@ public final class LogManager extends TabletManagerBase {
         }
     }
 
-    /**
-     * Close all the logs.
-     */
+    /** Close all the logs. */
     // 关闭所有日志。
     public void shutdown() {
         LOG.info("Shutting down LogManager.");
