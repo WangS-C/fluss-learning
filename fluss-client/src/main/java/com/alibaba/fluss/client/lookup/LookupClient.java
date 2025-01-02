@@ -22,12 +22,10 @@ import com.alibaba.fluss.config.ConfigOptions;
 import com.alibaba.fluss.config.Configuration;
 import com.alibaba.fluss.metadata.TableBucket;
 import com.alibaba.fluss.utils.concurrent.ExecutorThreadFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
-
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -45,6 +43,10 @@ import java.util.concurrent.TimeUnit;
  * lookup operation to a queue of pending lookup operations and immediately returns. This allows the
  * lookup operations to batch together individual lookup operations for efficiency.
  */
+//从服务器查找键值的客户端。
+//查找客户端包含一个待处理查找操作队列和后台 I/ O 线程，后者负责将这些查找操作转化为网络请求并传输到群集。
+//lookup(TableBucket, byte[])方法是异步的，调用时会将查找操作添加到待处理查找操作队列中，然后立即返回。
+// 这样，查找操作就能批量处理单个查找操作，从而提高效率。
 @ThreadSafe
 @Internal
 public class LookupClient {
@@ -72,6 +74,7 @@ public class LookupClient {
     private ExecutorService createThreadPool() {
         // according to benchmark, increase the thread pool size improve not so much
         // performance, so we always use 1 thread for simplicity.
+        //根据基准测试，增加线程池的大小对性能的提升不大，因此为了简单起见，我们始终使用 1 个线程。
         return Executors.newFixedThreadPool(1, new ExecutorThreadFactory(LOOKUP_THREAD_PREFIX));
     }
 

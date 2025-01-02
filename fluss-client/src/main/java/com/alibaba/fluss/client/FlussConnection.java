@@ -126,6 +126,7 @@ final class FlussConnection implements Connection {
         if (lookupClient != null) {
             // timeout is Long.MAX_VALUE to make the pending get request
             // to be processed
+            // 超时时间为 Long.MAX_VALUE，以便处理待处理的获取请求
             lookupClient.close(Duration.ofMillis(Long.MAX_VALUE));
         }
 

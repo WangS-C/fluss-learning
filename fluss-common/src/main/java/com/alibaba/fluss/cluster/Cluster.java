@@ -58,6 +58,7 @@ public final class Cluster {
     /**
      * Only latest schema of table will be put in it.
      */
+    //只有最新的表模式才会被放入其中。
     private final Map<TablePath, TableInfo> tableInfoByPath;
 
     public Cluster(
@@ -253,6 +254,7 @@ public final class Cluster {
     /**
      * Get the table info for this table.
      */
+    // 获取该表的表信息。
     public Optional<TableInfo> getTable(TablePath tablePath) {
         return Optional.ofNullable(tableInfoByPath.get(tablePath));
     }

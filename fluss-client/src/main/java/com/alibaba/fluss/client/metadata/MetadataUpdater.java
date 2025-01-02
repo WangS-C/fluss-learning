@@ -38,12 +38,10 @@ import com.alibaba.fluss.rpc.gateway.AdminReadOnlyGateway;
 import com.alibaba.fluss.rpc.gateway.CoordinatorGateway;
 import com.alibaba.fluss.rpc.gateway.TabletServerGateway;
 import com.alibaba.fluss.utils.ExceptionUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,7 +53,9 @@ import java.util.stream.Collectors;
 
 import static com.alibaba.fluss.client.utils.MetadataUtils.sendMetadataRequestAndRebuildCluster;
 
-/** The updater to initialize and update client metadata. */
+/**
+ * The updater to initialize and update client metadata.
+ */
 public class MetadataUpdater {
     private static final Logger LOG = LoggerFactory.getLogger(MetadataUpdater.class);
 
@@ -154,6 +154,7 @@ public class MetadataUpdater {
                         .filter(tablePath -> !cluster.getTable(tablePath).isPresent())
                         .collect(Collectors.toSet());
         if (!needUpdateTablePaths.isEmpty()) {
+            // 更新元数据
             updateMetadata(needUpdateTablePaths, null, null);
         }
     }
@@ -209,7 +210,9 @@ public class MetadataUpdater {
         updateMetadata(Collections.singleton(tablePath), null, partitionIds);
     }
 
-    /** Update the table or partition metadata info. */
+    /**
+     * Update the table or partition metadata info.
+     */
     public void updatePhysicalTableMetadata(Set<PhysicalTablePath> physicalTablePaths) {
         Set<TablePath> updateTablePaths = new HashSet<>();
         Set<PhysicalTablePath> updatePartitionPath = new HashSet<>();
@@ -257,6 +260,7 @@ public class MetadataUpdater {
                 ClientUtils.parseAndValidateAddresses(conf.get(ConfigOptions.BOOTSTRAP_SERVERS));
         Cluster cluster = null;
         for (InetSocketAddress address : inetSocketAddresses) {
+            //初始化集群
             cluster = tryToInitializeCluster(rpcClient, address);
             if (cluster != null) {
                 break;
@@ -285,6 +289,7 @@ public class MetadataUpdater {
                     // 为给定的网关类创建代理
                     GatewayClientProxy.createGatewayProxy(
                             () -> serverNode, rpcClient, AdminReadOnlyGateway.class);
+            //发送元数据请求并重建集群
             return sendMetadataRequestAndRebuildCluster(
                     adminReadOnlyGateway, Collections.emptySet());
         } catch (Exception e) {
@@ -296,7 +301,9 @@ public class MetadataUpdater {
         }
     }
 
-    /** Invalid the bucket metadata for the given physical table paths. */
+    /**
+     * Invalid the bucket metadata for the given physical table paths.
+     */
     public void invalidPhysicalTableBucketMeta(
             Collection<PhysicalTablePath> physicalTablesToInvalid) {
         if (!physicalTablesToInvalid.isEmpty()) {
@@ -304,7 +311,9 @@ public class MetadataUpdater {
         }
     }
 
-    /** Get the table physical paths by table ids and partition ids. */
+    /**
+     * Get the table physical paths by table ids and partition ids.
+     */
     public Collection<PhysicalTablePath> getPhysicalTablePathByIds(
             @Nullable Collection<Long> tableId,
             @Nullable Collection<TablePartition> tablePartitions) {

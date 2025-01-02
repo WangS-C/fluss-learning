@@ -76,7 +76,6 @@ import com.alibaba.fluss.utils.CloseableIterator;
 import com.alibaba.fluss.utils.Preconditions;
 
 import javax.annotation.Nullable;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,6 +91,7 @@ import static com.alibaba.fluss.client.utils.MetadataUtils.getOneAvailableTablet
  *
  * @since 0.1
  */
+// 表的基本含义。
 @PublicEvolving
 public class FlussTable implements Table {
 
@@ -105,17 +105,21 @@ public class FlussTable implements Table {
     private final int numBuckets;
     private final RowType keyRowType;
     // encode the key bytes for kv lookups
+    // 对用于 kv 查找的密钥字节进行编码
     private final KeyEncoder keyEncoder;
     // decode the lookup bytes to result row
+    // 将查找字节解码为结果行
     private final ValueDecoder kvValueDecoder;
     // a getter to extract partition from key row, null when it's not a partitioned primary key
     // table
+    // 从键记录中提取分区的 getter，如果不是分区主键表，则为空
     private final @Nullable PartitionGetter keyRowPartitionGetter;
 
     private final Supplier<WriterClient> writerSupplier;
     private final Supplier<LookupClient> lookupClientSupplier;
     private final AtomicBoolean closed;
     // metrics related.
+    // 相关指标。
     private final ClientMetricGroup clientMetricGroup;
 
     private volatile RemoteFileDownloader remoteFileDownloader;
@@ -176,6 +180,7 @@ public class FlussTable implements Table {
         }
         // encoding the key row using a compacted way consisted with how the key is encoded when put
         // a row
+        // 使用紧凑的方式对关键行进行编码，与关键行的编码方式一致
         byte[] keyBytes = keyEncoder.encode(key);
         Long partitionId = keyRowPartitionGetter == null ? null : getPartitionId(key);
         int bucketId = getBucketId(keyBytes, key);
@@ -225,6 +230,7 @@ public class FlussTable implements Table {
         }
 
         // because that rocksdb is not suitable to projection, thus do it in client.
+        // 因为rocksdb数据不适合投影，所以要在客户端进行投影。
         int leader = metadataUpdater.leaderFor(tableBucket);
         TabletServerGateway gateway = metadataUpdater.newTabletServerClientForNode(leader);
         RowType rowType = tableInfo.getTableDescriptor().getSchema().toRowType();
@@ -284,8 +290,9 @@ public class FlussTable implements Table {
             for (LogRecordBatch logRecordBatch : records.batches()) {
                 // A batch of log record maybe little more than limit, thus we need slice the
                 // last limit number.
+                // 一批日志记录可能比上限多一点，因此我们需要切分最后的上限数字。
                 try (CloseableIterator<LogRecord> logRecordIterator =
-                        logRecordBatch.records(readContext)) {
+                             logRecordBatch.records(readContext)) {
                     while (logRecordIterator.hasNext()) {
                         addScanRecord(
                                 projectedFields,
@@ -328,6 +335,8 @@ public class FlussTable implements Table {
      * partition doesn't exist. If the partition doesn't exist yet after update metadata, it'll
      * throw {@link PartitionNotExistException}.
      */
+    //返回记录所属分区的 ID。
+    //如果分区不存在，它会尝试更新元数据。如果更新元数据后分区仍不存在，则会抛出PartitionNotExistException。
     private Long getPartitionId(InternalRow row) {
         Preconditions.checkNotNull(keyRowPartitionGetter, "partitionGetter shouldn't be null.");
         String partitionName = keyRowPartitionGetter.getPartition(row);

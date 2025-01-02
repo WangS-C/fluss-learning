@@ -34,12 +34,10 @@ import com.alibaba.fluss.rpc.gateway.TabletServerGateway;
 import com.alibaba.fluss.rpc.metrics.ClientMetricGroup;
 import com.alibaba.fluss.utils.CopyOnWriteMap;
 import com.alibaba.fluss.utils.concurrent.ExecutorThreadFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
-
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +60,14 @@ import static com.alibaba.fluss.config.ConfigOptions.NoKeyAssigner.STICKY;
  * record sends and immediately returns. This allows the wrote record to batch together individual
  * records for efficiency.
  */
+//向服务器写入记录的客户端。
+//写入器由一个缓冲空间池和一个后台 I/ O 线程组成，
+// 前者用于保存尚未传输到tablet服务器的记录，
+// 后者负责将这些记录转化为请求并传输到群集。
+// 如果在使用后不关闭WriterClient，就会泄漏这些资源。
+//发送方法是异步的。
+// 调用时，它会将日志记录添加到待发送记录的缓冲区，然后立即返回。
+// 这样，写入的记录就可以批量发送单个记录，以提高效率。
 @ThreadSafe
 @Internal
 public class WriterClient {
@@ -72,6 +78,7 @@ public class WriterClient {
      * {@link ConfigOptions#CLIENT_WRITER_MAX_INFLIGHT_REQUESTS_PER_BUCKET} should be less than or
      * equal to this value when idempotence producer enabled to ensure message ordering.
      */
+    //当启用幂等生成器以确保报文排序时，ConfigOptions. CLIENT_WRITER_MAX_INFLIGHT_REQUESTS_PER_BUCKET应小于或等于此值。
     private static final int MAX_IN_FLIGHT_REQUESTS_PER_BUCKET_FOR_IDEMPOTENCE = 5;
 
     private final Configuration conf;
@@ -132,6 +139,10 @@ public class WriterClient {
      * call to complete, however no guarantee is made about the completion of records sent after the
      * flush call begins.
      */
+    //调用此方法可立即发送所有缓冲记录（即使 linger. ms大于 0），并阻塞与这些记录相关的请求的完成。
+    // flush()的后置条件是之前发送的任何记录都已完成（例如，Future. isDone() ==true）。
+    // 当请求根据您指定的acks配置被成功确认时，该请求即被视为已完成，否则会导致错误。
+    //当一个线程被阻塞等待刷新调用完成时，其他线程可以继续发送记录，但无法保证刷新调用开始后发送的记录是否完成。
     public void flush() {
         LOG.trace("Flushing accumulated records in writer.");
         long start = System.currentTimeMillis();
@@ -199,7 +210,9 @@ public class WriterClient {
         }
     }
 
-    /** Validate that the record size isn't too large. */
+    /**
+     * Validate that the record size isn't too large.
+     */
     // 验证记录大小是否过大。
     private void ensureValidRecordSize(int size) {
         if (size > totalMemorySize) {
@@ -215,6 +228,7 @@ public class WriterClient {
 
     // Verify that writer instance has not been closed. This method throws IllegalStateException if
     // writer has already been closed.
+    // 验证 writer 实例是否尚未关闭。如果 writer 已经关闭，该方法将抛出 IllegalStateException。
     private void throwIfWriterClosed() {
         if (sender == null || !sender.isRunning()) {
             throw new IllegalStateException(
@@ -229,7 +243,7 @@ public class WriterClient {
                 conf.getInt(ConfigOptions.CLIENT_WRITER_MAX_INFLIGHT_REQUESTS_PER_BUCKET);
         if (idempotenceEnabled
                 && maxInflightRequestPerBucket
-                        > MAX_IN_FLIGHT_REQUESTS_PER_BUCKET_FOR_IDEMPOTENCE) {
+                > MAX_IN_FLIGHT_REQUESTS_PER_BUCKET_FOR_IDEMPOTENCE) {
             throw new IllegalConfigurationException(
                     "The value of "
                             + ConfigOptions.CLIENT_WRITER_MAX_INFLIGHT_REQUESTS_PER_BUCKET.key()
@@ -333,6 +347,7 @@ public class WriterClient {
         if (!bucketKeys.isEmpty()) {
             if (tableDescriptor.isDataLakeEnabled()) {
                 // if lake is enabled, use lake table bucket assigner
+                // 如果启用了数据湖，则使用数据湖表桶分配器
                 return new LakeTableBucketAssigner(tableDescriptor, bucketNumber);
             } else {
                 return new HashBucketAssigner(bucketNumber);

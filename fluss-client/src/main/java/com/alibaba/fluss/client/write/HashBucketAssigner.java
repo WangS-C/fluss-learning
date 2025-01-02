@@ -26,7 +26,10 @@ import javax.annotation.Nullable;
 
 import static com.alibaba.fluss.utils.UnsafeUtils.BYTE_ARRAY_BASE_OFFSET;
 
-/** Hash bucket assigner. */
+/**
+ * Hash bucket assigner.
+ */
+// 哈希值分配器
 @Internal
 public class HashBucketAssigner implements BucketAssigner {
 
@@ -58,6 +61,7 @@ public class HashBucketAssigner implements BucketAssigner {
      * If the table contains primary key, the default hashing function to choose a bucket from the
      * serialized key bytes.
      */
+    //如果表中包含主键，默认散列函数会从序列化的键字节中选择一个桶。
     public static int bucketForRowKey(final byte[] key, final int numBuckets) {
         Preconditions.checkArgument(key.length != 0, "Assigned key must not be empty!");
         int keyHash = MurmurHashUtils.hashUnsafeBytes(key, BYTE_ARRAY_BASE_OFFSET, key.length);

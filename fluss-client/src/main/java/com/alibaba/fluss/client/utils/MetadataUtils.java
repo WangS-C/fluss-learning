@@ -73,6 +73,8 @@ public class MetadataUtils {
      * tables/partitions into cluster. The origin tables/partitions in cluster will not be cleared,
      * but will be updated.
      */
+    // 部分更新群集，是指我们将通过发送元数据请求来重建群集，请求物理表路径中的输入表/ 分区，然后将这些表/ 分区添加到群集中。
+    // 群集中的源表/ 分区不会被清除，但会被更新。
     public static Cluster sendMetadataRequestAndRebuildCluster(
             Cluster cluster,
             RpcClient client,

@@ -99,6 +99,9 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * @param request Request to get the schema
      * @return The response of getting schema
      */
+    //返回由给定的GetTableSchemaRequest 标识的GetTableSchemaResponse。
+    //参数：
+    //request- 获取模式的请求
     @RPC(api = ApiKeys.GET_TABLE_SCHEMA)
     CompletableFuture<GetTableSchemaResponse> getTableSchema(GetTableSchemaRequest request);
 
