@@ -30,7 +30,6 @@ import com.alibaba.fluss.types.DataType;
 import com.alibaba.fluss.types.RowType;
 import com.alibaba.fluss.utils.StringUtils;
 import com.alibaba.fluss.utils.TimeUtils;
-
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.catalog.CatalogTable;
 import org.apache.flink.table.catalog.Column;
@@ -52,43 +51,58 @@ import static com.alibaba.fluss.connector.flink.FlinkConnectorOptions.BUCKET_KEY
 import static com.alibaba.fluss.connector.flink.FlinkConnectorOptions.BUCKET_NUMBER;
 import static org.apache.flink.table.factories.FactoryUtil.CONNECTOR;
 
-/** Utils for conversion between Flink and Fluss. */
+/**
+ * Utils for conversion between Flink and Fluss.
+ */
 public class FlinkConversions {
 
-    private FlinkConversions() {}
+    private FlinkConversions() {
+    }
 
-    /** Convert Fluss's type to Flink's type. */
+    /**
+     * Convert Fluss's type to Flink's type.
+     */
     @VisibleForTesting
     public static org.apache.flink.table.types.DataType toFlinkType(DataType flussDataType) {
         return flussDataType.accept(FlussTypeToFlinkType.INSTANCE);
     }
 
-    /** Convert Fluss's RowType to Flink's RowType. */
+    /**
+     * Convert Fluss's RowType to Flink's RowType.
+     */
     public static org.apache.flink.table.types.logical.RowType toFlinkRowType(
             RowType flussRowType) {
         return (org.apache.flink.table.types.logical.RowType)
                 flussRowType.accept(FlussTypeToFlinkType.INSTANCE).getLogicalType();
     }
 
-    /** Convert Flink's physical type to Fluss' type. */
+    /**
+     * Convert Flink's physical type to Fluss' type.
+     */
     @VisibleForTesting
     public static DataType toFlussType(org.apache.flink.table.types.DataType flinkDataType) {
         return flinkDataType.getLogicalType().accept(FlinkTypeToFlussType.INSTANCE);
     }
 
-    /** Convert Flink's RowType to Fluss' RowType. */
+    /**
+     * Convert Flink's RowType to Fluss' RowType.
+     */
     public static RowType toFlussRowType(
             org.apache.flink.table.types.logical.RowType flinkRowType) {
         return (RowType) flinkRowType.accept(FlinkTypeToFlussType.INSTANCE);
     }
 
-    /** Convert Fluss's table to Flink's table. */
+    /**
+     * Convert Fluss's table to Flink's table.
+     */
+    //将 Fluss 表转换为 Flink 表。
     public static CatalogTable toFlinkTable(TableInfo tableInfo) {
         TableDescriptor tableDescriptor = tableInfo.getTableDescriptor();
         Map<String, String> newOptions =
                 new HashMap<>(tableInfo.getTableDescriptor().getCustomProperties());
 
         // put fluss table properties into flink options, to make the properties visible to users
+        //将 fluss 表格属性放到 flink 选项中，使用户可以看到这些属性
         convertFlussTablePropertiesToFlinkOptions(
                 tableInfo.getTableDescriptor().getProperties(), newOptions);
 
@@ -109,13 +123,14 @@ public class FlinkConversions {
         int columnCount =
                 physicalColumns.size()
                         + CatalogPropertiesUtils.nonPhysicalColumnsCount(
-                                newOptions, physicalColumns);
+                        newOptions, physicalColumns);
 
         int physicalColumnIndex = 0;
         for (int i = 0; i < columnCount; i++) {
             String optionalName = newOptions.get(CatalogPropertiesUtils.columnKey(i));
             if (optionalName == null) {
                 // build physical column from table row field
+                // 从表格行字段建立物理列
                 Schema.Column column = schema.getColumns().get(physicalColumnIndex++);
                 schemaBuilder.column(
                         column.getName(), FlinkConversions.toFlinkType(column.getDataType()));
@@ -124,11 +139,13 @@ public class FlinkConversions {
                 }
             } else {
                 // build non-physical column from options
+                // 从选项中建立非物理列
                 CatalogPropertiesUtils.deserializeComputedColumn(newOptions, i, schemaBuilder);
             }
         }
 
         // now, put distribution information to options
+        // 现在，将分配信息纳入选项
         if (tableDescriptor.getTableDistribution().isPresent()) {
             TableDescriptor.TableDistribution tableDistribution =
                     tableDescriptor.getTableDistribution().get();
@@ -144,6 +161,7 @@ public class FlinkConversions {
         }
 
         // deserialize watermark
+        // 反序列化水印
         CatalogPropertiesUtils.deserializeWatermark(newOptions, schemaBuilder);
 
         return CatalogTable.of(
@@ -153,7 +171,10 @@ public class FlinkConversions {
                 CatalogPropertiesUtils.deserializeOptions(newOptions));
     }
 
-    /** Convert Flink's table to Fluss's table. */
+    /**
+     * Convert Flink's table to Fluss's table.
+     */
+    //将 Flink 表格转换为 Fluss 表格。
     public static TableDescriptor toFlussTable(ResolvedCatalogTable catalogTable) {
         Configuration flinkTableConf = Configuration.fromMap(catalogTable.getOptions());
         String connector = flinkTableConf.get(CONNECTOR);
@@ -170,12 +191,14 @@ public class FlinkConversions {
         ResolvedSchema resolvedSchema = catalogTable.getResolvedSchema();
 
         // now, build Fluss's table
+        // 现在，构建 Fluss 表
         Schema.Builder schemBuilder = Schema.newBuilder();
         if (resolvedSchema.getPrimaryKey().isPresent()) {
             schemBuilder.primaryKey(resolvedSchema.getPrimaryKey().get().getColumns());
         }
 
         // first build schema with physical columns
+        // 首先建立有物理列的模式
         Schema schema =
                 schemBuilder
                         .fromColumns(
@@ -208,9 +231,11 @@ public class FlinkConversions {
         String comment = catalogTable.getComment();
 
         // convert some flink options to fluss table configs.
+        // 将一些 flink 选项转换为 fluss 表配置。
         Map<String, String> properties = convertFlinkOptionsToFlussTableProperties(flinkTableConf);
 
         // then set distributed by information
+        // 然后按信息分布设置
         List<String> bucketKey;
         if (flinkTableConf.containsKey(BUCKET_KEY.key())) {
             bucketKey =
@@ -219,6 +244,7 @@ public class FlinkConversions {
                             .collect(Collectors.toList());
         } else {
             // use primary keys - partition keys
+            // 使用主键 - 分区键
             bucketKey =
                     schema.getPrimaryKey()
                             .map(
@@ -242,7 +268,9 @@ public class FlinkConversions {
                 .build();
     }
 
-    /** Convert Fluss's ConfigOptions to Flink's ConfigOptions. */
+    /**
+     * Convert Fluss's ConfigOptions to Flink's ConfigOptions.
+     */
     public static List<org.apache.flink.configuration.ConfigOption<?>> toFlinkOptions(
             Collection<ConfigOption<?>> flussOption) {
         return flussOption.stream()
@@ -250,7 +278,9 @@ public class FlinkConversions {
                 .collect(Collectors.toList());
     }
 
-    /** Convert Fluss's ConfigOption to Flink's ConfigOption. */
+    /**
+     * Convert Fluss's ConfigOption to Flink's ConfigOption.
+     */
     public static org.apache.flink.configuration.ConfigOption<?> toFlinkOption(
             ConfigOption<?> flussOption) {
         org.apache.flink.configuration.ConfigOptions.OptionBuilder builder =

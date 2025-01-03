@@ -30,7 +30,6 @@ import com.alibaba.fluss.metadata.TableInfo;
 import com.alibaba.fluss.metadata.TablePath;
 import com.alibaba.fluss.utils.ExceptionUtils;
 import com.alibaba.fluss.utils.IOUtils;
-
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogBaseTable;
 import org.apache.flink.table.catalog.CatalogDatabase;
@@ -61,7 +60,6 @@ import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.factories.Factory;
 
 import javax.annotation.Nullable;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +69,9 @@ import java.util.Optional;
 import static com.alibaba.fluss.config.ConfigOptions.BOOTSTRAP_SERVERS;
 import static org.apache.flink.util.Preconditions.checkArgument;
 
-/** A Flink Catalog for fluss. */
+/**
+ * A Flink Catalog for fluss.
+ */
 public class FlinkCatalog implements Catalog {
 
     public static final String LAKE_TABLE_SPLITTER = "$lake";
@@ -229,11 +229,13 @@ public class FlinkCatalog implements Catalog {
     public CatalogBaseTable getTable(ObjectPath objectPath)
             throws TableNotExistException, CatalogException {
         // may be should be as a datalake table
+        // 可能应作为一个数据表
         String tableName = objectPath.getObjectName();
         TablePath tablePath = toTablePath(objectPath);
         try {
             TableInfo tableInfo;
             // table name contains $lake, means to read from datalake
+            // 表名包含$lake，表示从数据湖读取数据
             if (tableName.contains(LAKE_TABLE_SPLITTER)) {
                 tableInfo =
                         admin.getTable(
@@ -242,6 +244,7 @@ public class FlinkCatalog implements Catalog {
                                                 tableName.split("\\" + LAKE_TABLE_SPLITTER)[0]))
                                 .get();
                 // we need to make sure the table enable datalake
+                // 我们需要确保表格启用数据采集功能
                 if (!tableInfo.getTableDescriptor().isDataLakeEnabled()) {
                     throw new UnsupportedOperationException(
                             String.format(
@@ -256,6 +259,7 @@ public class FlinkCatalog implements Catalog {
             }
 
             // should be as a fluss table
+            // 将 Fluss 表转换为 Flink 表。
             CatalogTable catalogTable = FlinkConversions.toFlinkTable(tableInfo);
             // add bootstrap servers option
             Map<String, String> newOptions = new HashMap<>(catalogTable.getOptions());
@@ -278,9 +282,11 @@ public class FlinkCatalog implements Catalog {
         String[] tableComponents = tableName.split("\\" + LAKE_TABLE_SPLITTER);
         if (tableComponents.length == 1) {
             // should be pattern like table_name$lake
+            // 应该是这样的模式 table_name$lake
             tableName = tableComponents[0];
         } else {
             // be some thing like table_name$lake$snapshot
+            //类似于 table_name$lake$snapshot
             tableName = String.join("", tableComponents);
         }
         return lakeCatalog.getTable(new ObjectPath(databaseName, tableName));
@@ -367,7 +373,7 @@ public class FlinkCatalog implements Catalog {
     public List<CatalogPartitionSpec> listPartitions(
             ObjectPath objectPath, CatalogPartitionSpec catalogPartitionSpec)
             throws TableNotExistException, TableNotPartitionedException,
-                    PartitionSpecInvalidException, CatalogException {
+            PartitionSpecInvalidException, CatalogException {
         throw new UnsupportedOperationException();
     }
 
@@ -398,8 +404,8 @@ public class FlinkCatalog implements Catalog {
             CatalogPartition catalogPartition,
             boolean b)
             throws TableNotExistException, TableNotPartitionedException,
-                    PartitionSpecInvalidException, PartitionAlreadyExistsException,
-                    CatalogException {
+            PartitionSpecInvalidException, PartitionAlreadyExistsException,
+            CatalogException {
         throw new UnsupportedOperationException();
     }
 

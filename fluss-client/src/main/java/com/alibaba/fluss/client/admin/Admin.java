@@ -88,13 +88,21 @@ public interface Admin extends AutoCloseable {
      *       ignoreIfExists} is false.
      * </ul>
      *
-     * @param databaseName The name of the database to create.
+     * @param databaseName   The name of the database to create.
      * @param ignoreIfExists Flag to specify behavior when a database with the given name already
-     *     exists: if set to false, throw a DatabaseAlreadyExistException, if set to true, do
-     *     nothing.
+     *                       exists: if set to false, throw a DatabaseAlreadyExistException, if set to true, do
+     *                       nothing.
      * @throws InvalidDatabaseException if the database name is invalid, e.g., contains illegal
-     *     characters, or exceeds the maximum length.
+     *                                  characters, or exceeds the maximum length.
      */
+    //异步创建新数据库
+    //在对返回的 future 调用get()时，可能会出现以下异常。
+    //DatabaseAlreadyExistException（如果数据库已存在，且ignoreIfExists为 false）。
+    //参数
+    //databaseName- 要创建的数据库名称。
+    //ignoreIfExists- 当给定名称的数据库已经存在时指定行为的标志：
+    // 如果设置为 false，则抛出 DatabaseAlreadyExistException；
+    // 如果设置为 true，则什么也不做。
     CompletableFuture<Void> createDatabase(String databaseName, boolean ignoreIfExists)
             throws InvalidDatabaseException;
 
@@ -110,12 +118,22 @@ public interface Admin extends AutoCloseable {
      *       false.
      * </ul>
      *
-     * @param databaseName The name of the database to delete.
+     * @param databaseName      The name of the database to delete.
      * @param ignoreIfNotExists Flag to specify behavior when a database with the given name does
-     *     not exist: if set to false, throw a DatabaseNotExistException, if set to true, do
-     *     nothing.
-     * @param cascade Flag to specify whether to delete all tables in the database.
+     *                          not exist: if set to false, throw a DatabaseNotExistException, if set to true, do
+     *                          nothing.
+     * @param cascade           Flag to specify whether to delete all tables in the database.
      */
+    //异步删除指定名称的数据库。
+    //在对返回的 future 调用get()时，可能会出现以下异常。
+    //如果数据库不存在，且ignoreIfNotExists为 false，则会出现DatabaseNotExistException。
+    //如果数据库不是空的，且cascade为 false，则会出现DatabaseNotEmptyException。
+    //参数
+    //databaseName- 要删除的数据库名称。
+    // ignoreIfNotExists- 当不存在给定名称的数据库时，用于指定行为的标志：
+    // 如果设置为 false，则抛出 DatabaseNotExistException；
+    // 如果设置为 true，则什么也不做。
+    // cascade- 用于指定是否删除数据库中所有表的标志。
     CompletableFuture<Void> deleteDatabase(
             String databaseName, boolean ignoreIfNotExists, boolean cascade);
 
@@ -124,9 +142,13 @@ public interface Admin extends AutoCloseable {
      *
      * @param databaseName The name of the database to check.
      */
+    // 异步获取数据库是否存在
     CompletableFuture<Boolean> databaseExists(String databaseName);
 
-    /** List all databases in fluss cluster asynchronously. */
+    /**
+     * List all databases in fluss cluster asynchronously.
+     */
+    //异步列出 fluss 集群中的所有数据库。
     CompletableFuture<List<String>> listDatabases();
 
     /**
@@ -142,13 +164,24 @@ public interface Admin extends AutoCloseable {
      *       than the number of available tablet servers.
      * </ul>
      *
-     * @param tablePath The tablePath of the table.
+     * @param tablePath       The tablePath of the table.
      * @param tableDescriptor The table to create.
-     * @throws InvalidTableException if the table name is invalid, e.g., contains illegal
-     *     characters, or exceeds the maximum length.
+     * @throws InvalidTableException    if the table name is invalid, e.g., contains illegal
+     *                                  characters, or exceeds the maximum length.
      * @throws InvalidDatabaseException if the database name is invalid, e.g., contains illegal
-     *     characters, or exceeds the maximum length.
+     *                                  characters, or exceeds the maximum length.
      */
+    //异步创建新表
+    //在对返回的 future 调用get()时，可能会出现以下异常。
+    //如果表路径中的数据库不存在，则会出现DatabaseNotExistException 异常。
+    //如果表已经存在，且ignoreIfExists为 false，则会出现TableAlreadyExistException异常。
+    //如果表的复制因子大于可用平板服务器的数量，则会出现InvalidReplicationFactorException 异常。
+    //参数：
+    //tablePath- 表的表路径。
+    //tableDescriptor- 要创建的表。
+    //抛出
+    //InvalidTableException- 如果表名无效，例如包含非法字符或超过最大长度。
+    //InvalidDatabaseException- 如果数据库名称无效，例如包含非法字符或超过最大长度
     CompletableFuture<Void> createTable(
             TablePath tablePath, TableDescriptor tableDescriptor, boolean ignoreIfExists)
             throws InvalidTableException, InvalidDatabaseException;
@@ -164,6 +197,11 @@ public interface Admin extends AutoCloseable {
      *
      * @param tablePath The table path of the table.
      */
+    // 使用给定的表格路径异步获取表格。
+    //在对返回的 future 调用get()时，可能会出现以下异常。
+    //TableNotExistException（表不存在异常），如果表不存在。
+    //参数
+    //tablePath- 表的路径。
     CompletableFuture<TableInfo> getTable(TablePath tablePath);
 
     /**
@@ -176,10 +214,18 @@ public interface Admin extends AutoCloseable {
      *       ignoreIfNotExists} is false.
      * </ul>
      *
-     * @param tablePath The table path of the table.
+     * @param tablePath         The table path of the table.
      * @param ignoreIfNotExists Flag to specify behavior when a table with the given name does not
-     *     exist: if set to false, throw a TableNotExistException, if set to true, do nothing.
+     *                          exist: if set to false, throw a TableNotExistException, if set to true, do nothing.
      */
+    //使用给定的表路径异步删除表。
+    //在对返回的 future 调用get()时，可能会出现以下异常。
+    //如果表不存在且ignoreIfNotExists为 false，则会出现TableNotExistException异常。
+    //参数
+    //tablePath- 表的路径。
+    //ignoreIfNotExists- 当指定名称的表不存在时，用于指定行为的标志：
+    // 如果设置为 false，则抛出 TableNotExistException；
+    // 如果设置为 true，则什么也不做。
     CompletableFuture<Void> deleteTable(TablePath tablePath, boolean ignoreIfNotExists);
 
     /**
@@ -187,6 +233,9 @@ public interface Admin extends AutoCloseable {
      *
      * @param tablePath The table path of the table.
      */
+    //异步获取表格是否存在。
+    //参数：
+    //tablePath- 表的路径。
     CompletableFuture<Boolean> tableExists(TablePath tablePath);
 
     /**
@@ -200,6 +249,11 @@ public interface Admin extends AutoCloseable {
      *
      * @param databaseName The name of the database.
      */
+    //异步列出 fluss 集群中给定数据库的所有表。
+    //在对返回的 future 调用get()时，可能会出现以下异常。
+    //如果数据库不存在，则会出现DatabaseNotExistException 异常。
+    //参数
+    //databaseName- 数据库名称。
     CompletableFuture<List<String>> listTables(String databaseName);
 
     /**
@@ -251,8 +305,8 @@ public interface Admin extends AutoCloseable {
      * end offset as well as the offset matching a timestamp in buckets.
      *
      * @param physicalTablePath the physical table path of the buckets.
-     * @param buckets the buckets to fetch offset.
-     * @param offsetSpec the offset spec to fetch.
+     * @param buckets           the buckets to fetch offset.
+     * @param offsetSpec        the offset spec to fetch.
      */
     ListOffsetsResult listOffsets(
             PhysicalTablePath physicalTablePath,
@@ -277,6 +331,8 @@ public interface Admin extends AutoCloseable {
     CompletableFuture<PartitionSnapshotInfo> getPartitionSnapshot(
             TablePath tablePath, String partitionName);
 
-    /** Describe the lake used for lakehouse storage. */
+    /**
+     * Describe the lake used for lakehouse storage.
+     */
     CompletableFuture<LakeStorageInfo> describeLakeStorage();
 }

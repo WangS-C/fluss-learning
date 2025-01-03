@@ -29,13 +29,16 @@ import com.alibaba.fluss.rpc.protocol.RPC;
 
 import java.util.concurrent.CompletableFuture;
 
-/** The gateway interface between the client and the server for reading and writing metadata. */
+/**
+ * The gateway interface between the client and the server for reading and writing metadata.
+ */
 public interface AdminGateway extends AdminReadOnlyGateway {
     /**
      * Create a database.
      *
      * @param request Create database request
      */
+    // 创建数据库。
     @RPC(api = ApiKeys.CREATE_DATABASE)
     CompletableFuture<CreateDatabaseResponse> createDatabase(CreateDatabaseRequest request);
 
@@ -44,6 +47,7 @@ public interface AdminGateway extends AdminReadOnlyGateway {
      *
      * @param request Drop database request.
      */
+    // 删除数据库。
     @RPC(api = ApiKeys.DROP_DATABASE)
     CompletableFuture<DropDatabaseResponse> dropDatabase(DropDatabaseRequest request);
 
@@ -52,6 +56,9 @@ public interface AdminGateway extends AdminReadOnlyGateway {
      *
      * @param request the request to create table.
      */
+    //创建新表。
+    //参数：
+    //request- 创建表格的请求。
     @RPC(api = ApiKeys.CREATE_TABLE)
     CompletableFuture<CreateTableResponse> createTable(CreateTableRequest request);
 

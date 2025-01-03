@@ -34,6 +34,10 @@ import java.util.Objects;
  *
  * @since 0.1
  */
+// 数据库名称和表名组合。表路径在 Fluss 集群中是唯一的，可用于在某一时刻识别表。
+//注意：表名可通过RENAME TABLE语句修改，因此表路径可能在不同时间指向不同的表。
+// 创建表格时，Fluss 会为每个表格分配一个唯一的 tableId（即 TableInfo. getTableId()）。
+// 表 ID 可随时用于识别表。
 @PublicEvolving
 public class TablePath implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -44,6 +48,11 @@ public class TablePath implements Serializable {
     // length of table names. Since the max length of table_id is 10 characters, the length of
     // table_name shouldn't exceed 244 characters. However, We set the max length of both table name
     // and database name to 200 to leave enough room for the future.
+    // 在 Fluss 中，数据库名称和表名称用作本地文件夹名称。
+    // 此类文件夹的名称由"{database_name}/{table_name}-{table_id}/log-{bucket_id}/xxx.log "组成。
+    // 由于典型的文件夹名称长度不能超过 255 个字符，因此对表名的长度也有限制。
+    // 由于 table_id 的最大长度为 10 个字符，因此 table_name 的长度不应超过 244 个字符。
+    // 不过，我们将表名和数据库名的最大长度都设置为 200，以便为将来留出足够的空间。
     private static final int MAX_NAME_LENGTH = 200;
 
     private final String databaseName;
@@ -70,6 +79,7 @@ public class TablePath implements Serializable {
      * Returns true if the table path is valid. A table path is valid if both the database and table
      * names are valid.
      */
+    //如果表路径有效，则返回 true。如果数据库和表名都有效，则表路径有效。
     public boolean isValid() {
         return detectInvalidName(databaseName) == null && detectInvalidName(tableName) == null;
     }
@@ -78,9 +88,13 @@ public class TablePath implements Serializable {
      * Validate the table path. A table path is valid if both the database and table names are
      * valid.
      *
-     * @throws InvalidTableException if the table name is invalid.
+     * @throws InvalidTableException    if the table name is invalid.
      * @throws InvalidDatabaseException if the database name is invalid.
      */
+    // 验证表路径。如果数据库和表名都有效，则表路径有效。
+    //抛出
+    //InvalidTableException- 如果表名无效。
+    //InvalidDatabaseException- 如果数据库名称无效。
     public void validate() throws InvalidTableException, InvalidDatabaseException {
         validateDatabaseName(databaseName);
         validateTableName(tableName);
@@ -157,7 +171,10 @@ public class TablePath implements Serializable {
         return null;
     }
 
-    /** Valid characters for Fluss table names are the ASCII alphanumerics, '_', and '-'. */
+    /**
+     * Valid characters for Fluss table names are the ASCII alphanumerics, '_', and '-'.
+     */
+    // Fluss 表名的有效字符为 ASCII 字母数字、"_"和"-"。
     private static boolean containsInvalidPattern(String identifier) {
         for (int i = 0; i < identifier.length(); ++i) {
             char c = identifier.charAt(i);

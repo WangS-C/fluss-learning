@@ -62,6 +62,7 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      *
      * @return a list of the names of all databases
      */
+    // 获取此目录中所有数据库的名称。
     @RPC(api = ApiKeys.LIST_DATABASES)
     CompletableFuture<ListDatabasesResponse> listDatabases(ListDatabasesRequest request);
 
@@ -71,6 +72,8 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * @param request Database exists request
      * @return a future with true if the given database exists in the catalog false otherwise
      */
+    // 检查此目录中是否存在数据库。
+    // 如果给定的数据库存在于目录中则为 true，否则为 false。
     @RPC(api = ApiKeys.DATABASE_EXISTS)
     CompletableFuture<DatabaseExistsResponse> databaseExists(DatabaseExistsRequest request);
 
@@ -80,6 +83,7 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * Get names of all tables and views under this database. An empty list is returned if none
      * exists.
      */
+    //获取该数据库下所有表和视图的名称。如果不存在，则返回空列表。
     @RPC(api = ApiKeys.LIST_TABLES)
     CompletableFuture<ListTablesResponse> listTables(ListTablesRequest request);
 
@@ -89,6 +93,9 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * @param request Path of the table
      * @return The response of requested table
      */
+    //根据给定的GetTableRequest 返回GetTableResponse。
+    //参数：
+    //request- 表的路径
     @RPC(api = ApiKeys.GET_TABLE)
     CompletableFuture<GetTableResponse> getTable(GetTableRequest request);
 
@@ -111,6 +118,9 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * @param request table exists request
      * @return a future returns true if the given table exists in the catalog false otherwise
      */
+    //检查表是否存在。
+    //参数：
+    //request- 表格存在请求
     @RPC(api = ApiKeys.TABLE_EXISTS)
     CompletableFuture<TableExistsResponse> tableExists(TableExistsRequest request);
 

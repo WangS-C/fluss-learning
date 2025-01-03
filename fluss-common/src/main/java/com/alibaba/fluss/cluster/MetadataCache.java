@@ -68,6 +68,7 @@ public interface MetadataCache {
     /**
      * Get ids of all alive tablet server nodes.
      */
+    //获取所有活着的tablet服务器节点的 ID。
     default int[] getLiveServerIds() {
         List<ServerNode> serverNodes = new ArrayList<>(getAllAliveTabletServers().values());
         int[] server = new int[serverNodes.size()];

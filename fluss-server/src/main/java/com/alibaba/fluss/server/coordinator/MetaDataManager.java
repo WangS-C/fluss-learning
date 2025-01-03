@@ -134,6 +134,7 @@ public class MetaDataManager {
 
         // in here, we just delete the table node in zookeeper, which will then trigger
         // the physical deletion in tablet servers and assignments in zk
+        //在这里，我们只需在 zookeeper 中删除表节点，然后在 tablet 服务器中触发物理删除，并在 zk 中进行分配
         uncheck(() -> zookeeperClient.deleteTable(tablePath), "Fail to drop table: " + tablePath);
     }
 
@@ -165,6 +166,13 @@ public class MetaDataManager {
      * @param ignoreIfExists  whether to ignore if the table already exists
      * @return the table id
      */
+    //在 zookeeper 中创建给定表的必要元数据，并返回表 id。
+    // 如果表已存在且 ignoreIfExists 为 true，则返回-1。
+    //参数
+    //tablePath- 表路径
+    //tableDescriptor- 表描述符
+    //tableAssignment- 表分配，当表是分区表时将为空
+    //ignoreIfExists- 是否忽略表是否已存在
     public long createTable(
             TablePath tablePath,
             TableDescriptor tableDescriptor,
@@ -184,11 +192,13 @@ public class MetaDataManager {
         }
 
         // validate all table properties are known to Fluss and property values are valid.
+        //验证 Fluss 已知所有表格属性，且属性值有效。
         FlussConfigUtils.validateTableProperties(tableDescriptor.getProperties());
 
         // register schema to zk
         // first register a schema to the zk, if then register the table
         // to zk fails, there's no harm to register a new schema to zk again
+        //先向 zk 注册模式，如果向 zk 注册表失败，再向 zk 注册新模式也无妨
         try {
             zookeeperClient.registerSchema(tablePath, tableDescriptor.getSchema());
         } catch (Exception e) {
@@ -198,15 +208,19 @@ public class MetaDataManager {
 
         // register the table, we have registered the schema whose path have contained the node for
         // the table, then we won't need to create the node to store the table
+        //注册表时，我们已经注册了模式，其路径包含了表的节点，这样我们就不需要创建节点来存储表了
         return uncheck(
                 () -> {
                     // generate a table id
+                    //生成表 id
                     long tableId = zookeeperClient.getTableIdAndIncrement();
                     if (tableAssignment != null) {
                         // register table assignment
+                        // 注册表分配
                         zookeeperClient.registerTableAssignment(tableId, tableAssignment);
                     }
                     // register the table
+                    // 注册表
                     zookeeperClient.registerTable(
                             tablePath, TableRegistration.of(tableId, tableDescriptor), false);
                     return tableId;
@@ -269,6 +283,7 @@ public class MetaDataManager {
 
     public boolean tableExists(TablePath tablePath) {
         // check the path of the table exists
+        // 检查表的路径是否存在
         return uncheck(
                 () -> zookeeperClient.tableExist(tablePath),
                 String.format("Fail to check the table %s exist or not.", tablePath));

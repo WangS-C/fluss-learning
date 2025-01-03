@@ -60,7 +60,6 @@ import com.alibaba.fluss.types.DataType;
 import com.alibaba.fluss.types.DataTypeRoot;
 import com.alibaba.fluss.utils.AutoPartitionStrategy;
 import com.alibaba.fluss.utils.concurrent.FutureUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +70,9 @@ import java.util.function.Supplier;
 import static com.alibaba.fluss.server.utils.RpcMessageUtils.getCommitLakeTableSnapshotData;
 import static com.alibaba.fluss.server.utils.RpcMessageUtils.toTablePath;
 
-/** An RPC Gateway service for coordinator server. */
+/**
+ * An RPC Gateway service for coordinator server.
+ */
 public final class CoordinatorService extends RpcServiceBase implements CoordinatorGateway {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoordinatorService.class);
@@ -136,12 +137,14 @@ public final class CoordinatorService extends RpcServiceBase implements Coordina
 
         int bucketCount = defaultBucketNumber;
         // not set distribution
+        // 未设置分布
         if (!tableDescriptor.getTableDistribution().isPresent()) {
             tableDescriptor = tableDescriptor.copy(defaultBucketNumber);
         } else {
             Optional<Integer> optBucketCount =
                     tableDescriptor.getTableDistribution().get().getBucketCount();
             // not set bucket number
+            // 未设置桶数
             if (!optBucketCount.isPresent()) {
                 tableDescriptor = tableDescriptor.copy(defaultBucketNumber);
             } else {
@@ -150,18 +153,23 @@ public final class CoordinatorService extends RpcServiceBase implements Coordina
         }
 
         // first, generate the assignment
+        //首先，生成任务
         TableAssignment tableAssignment = null;
         // only when it's no partitioned table do we generate the assignment for it
+        // 只有在没有分区表的情况下，我们才会为它生成赋值
         if (!tableDescriptor.isPartitioned()) {
+            //不是分区表
             int replicaFactor = tableDescriptor.getReplicationFactor(defaultReplicationFactor);
             int[] servers = metadataCache.getLiveServerIds();
             tableAssignment =
                     TableAssignmentUtils.generateAssignment(bucketCount, replicaFactor, servers);
         } else {
+            //分区表完整性检查
             sanityCheckPartitionedTable(tableDescriptor);
         }
 
         // then create table;
+        //然后创建表格；
         metadataManager.createTable(
                 tablePath, tableDescriptor, tableAssignment, request.isIgnoreIfExists());
 

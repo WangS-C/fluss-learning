@@ -285,6 +285,7 @@ public class ZooKeeperClient implements AutoCloseable {
     /**
      * Register a database to zk.
      */
+    // 向 zk 注册数据库。
     public void registerDatabase(String database) throws Exception {
         String path = DatabaseZNode.path(database);
         zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path);
@@ -316,6 +317,7 @@ public class ZooKeeperClient implements AutoCloseable {
     /**
      * generate a table id .
      */
+    //生成表 ID .
     public long getTableIdAndIncrement() throws Exception {
         return tableIdCounter.getAndIncrement();
     }
@@ -340,6 +342,10 @@ public class ZooKeeperClient implements AutoCloseable {
      *                       path of the path to store the table, then register the table, we won't need to create the
      *                       node again.
      */
+    //将表注册为 ZK 元数据。
+    //参数：
+    //needCreateNode- 向 ZK 注册表时，是否需要创建路径节点。
+    // 如果我们先将模式注册到一个路径，该路径将是存储表的路径的子路径，然后再注册表，则无需再次创建节点。
     public void registerTable(
             TablePath tablePath, TableRegistration tableRegistration, boolean needCreateNode)
             throws Exception {
@@ -395,6 +401,8 @@ public class ZooKeeperClient implements AutoCloseable {
         // when we create a table, we will first create a node with
         // path 'table_path/schemas/schema_id' to store the schema, so we can't use the path of
         // table 'table_path' exist or not to check the table exist or not.
+        //当我们创建表格时，首先会创建一个路径为 "table_path/schemas/schema_id"的节点来存储模式，
+        // 因此我们不能使用 "table_path "是否存在来检查表格是否存在。
         return stat != null && stat.getDataLength() > 0;
     }
 
@@ -471,9 +479,12 @@ public class ZooKeeperClient implements AutoCloseable {
     /**
      * Register schema to ZK metadata and return the schema id.
      */
+    //向 ZK 元数据注册模式并返回模式 ID。
     public int registerSchema(TablePath tablePath, Schema schema) throws Exception {
+        //获取给定表在 ZK 元数据中的当前模式 ID。
         int currentSchemaId = getCurrentSchemaId(tablePath);
         // increase schema id.
+        //增加模式 ID。
         currentSchemaId++;
         String path = SchemaZNode.path(tablePath, currentSchemaId);
         zkClient.create()
@@ -495,6 +506,7 @@ public class ZooKeeperClient implements AutoCloseable {
     /**
      * Gets the current schema id of the given table in ZK metadata.
      */
+    //获取给定表在 ZK 元数据中的当前模式 ID。
     public int getCurrentSchemaId(TablePath tablePath) throws Exception {
         Optional<Integer> currentSchemaId =
                 getChildren(SchemasZNode.path(tablePath)).stream()
