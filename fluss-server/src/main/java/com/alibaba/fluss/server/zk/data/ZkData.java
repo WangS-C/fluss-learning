@@ -25,9 +25,7 @@ import com.alibaba.fluss.utils.json.JsonSerdeUtils;
 
 import javax.annotation.Nullable;
 
-/**
- * The data and path stored in ZooKeeper nodes (znodes).
- */
+/** The data and path stored in ZooKeeper nodes (znodes). */
 public final class ZkData {
 
     // ------------------------------------------------------------------------------------------
@@ -128,7 +126,7 @@ public final class ZkData {
      *
      * <p>/metadata/databases/[databaseName]/tables/[tableName]/schemas/[schemaId]
      */
-    //存储特定模式的模式信息的表的 znode。znode 路径为
+    // 存储特定模式的模式信息的表的 znode。znode 路径为
     // / metadata/ databases/[databaseName]/ tables/[tableName]/ schemas/[schemaId]。
     public static final class SchemaZNode {
         public static String path(TablePath tablePath, int schemaId) {
@@ -334,7 +332,7 @@ public final class ZkData {
      *
      * <p>/tabletservers/tables/[tableId]
      */
-    //表 id 的 Znode，用于存储表的分配和位置。表 id 由ZkData. TableSequenceIdZNode生成，并保证在群集中是唯一的。znode 路径为
+    // 表 id 的 Znode，用于存储表的分配和位置。表 id 由ZkData. TableSequenceIdZNode生成，并保证在群集中是唯一的。znode 路径为
     /// tabletservers/tables/[tableId]
     public static final class TableIdZNode {
         public static String path(long tableId) {

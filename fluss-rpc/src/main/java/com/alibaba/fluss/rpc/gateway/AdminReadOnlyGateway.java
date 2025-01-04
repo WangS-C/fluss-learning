@@ -50,9 +50,7 @@ import com.alibaba.fluss.rpc.protocol.RPC;
 
 import java.util.concurrent.CompletableFuture;
 
-/**
- * The gateway interface between the client and the server for the read-only metadata access.
- */
+/** The gateway interface between the client and the server for the read-only metadata access. */
 public interface AdminReadOnlyGateway extends RpcGateway {
 
     // ------ databases ------
@@ -83,7 +81,7 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * Get names of all tables and views under this database. An empty list is returned if none
      * exists.
      */
-    //获取该数据库下所有表和视图的名称。如果不存在，则返回空列表。
+    // 获取该数据库下所有表和视图的名称。如果不存在，则返回空列表。
     @RPC(api = ApiKeys.LIST_TABLES)
     CompletableFuture<ListTablesResponse> listTables(ListTablesRequest request);
 
@@ -93,9 +91,9 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * @param request Path of the table
      * @return The response of requested table
      */
-    //根据给定的GetTableRequest 返回GetTableResponse。
-    //参数：
-    //request- 表的路径
+    // 根据给定的GetTableRequest 返回GetTableResponse。
+    // 参数：
+    // request- 表的路径
     @RPC(api = ApiKeys.GET_TABLE)
     CompletableFuture<GetTableResponse> getTable(GetTableRequest request);
 
@@ -106,9 +104,9 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * @param request Request to get the schema
      * @return The response of getting schema
      */
-    //返回由给定的GetTableSchemaRequest 标识的GetTableSchemaResponse。
-    //参数：
-    //request- 获取模式的请求
+    // 返回由给定的GetTableSchemaRequest 标识的GetTableSchemaResponse。
+    // 参数：
+    // request- 获取模式的请求
     @RPC(api = ApiKeys.GET_TABLE_SCHEMA)
     CompletableFuture<GetTableSchemaResponse> getTableSchema(GetTableSchemaRequest request);
 
@@ -118,9 +116,9 @@ public interface AdminReadOnlyGateway extends RpcGateway {
      * @param request table exists request
      * @return a future returns true if the given table exists in the catalog false otherwise
      */
-    //检查表是否存在。
-    //参数：
-    //request- 表格存在请求
+    // 检查表是否存在。
+    // 参数：
+    // request- 表格存在请求
     @RPC(api = ApiKeys.TABLE_EXISTS)
     CompletableFuture<TableExistsResponse> tableExists(TableExistsRequest request);
 

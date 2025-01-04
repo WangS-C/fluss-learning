@@ -20,9 +20,7 @@ import com.alibaba.fluss.cluster.BucketLocation;
 
 import java.util.List;
 
-/**
- * This entity used to describe the table's partition info.
- */
+/** This entity used to describe the table's partition info. */
 // 该实体用于描述表的分区信息。
 public class PartitionMetadataInfo {
 

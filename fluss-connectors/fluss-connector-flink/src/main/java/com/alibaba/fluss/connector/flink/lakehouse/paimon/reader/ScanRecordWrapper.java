@@ -17,7 +17,6 @@
 package com.alibaba.fluss.connector.flink.lakehouse.paimon.reader;
 
 import com.alibaba.fluss.client.scanner.ScanRecord;
-
 import org.apache.paimon.data.BinaryString;
 import org.apache.paimon.data.Decimal;
 import org.apache.paimon.data.InternalArray;
@@ -26,7 +25,10 @@ import org.apache.paimon.data.InternalRow;
 import org.apache.paimon.data.Timestamp;
 import org.apache.paimon.types.RowKind;
 
-/** A wrapper of {@link ScanRecord} which bridges {@link ScanRecord} to Paimon' internal row. */
+/**
+ * A wrapper of {@link ScanRecord} which bridges {@link ScanRecord} to Paimon' internal row.
+ */
+// ScanRecord的包装器，它将ScanRecord与 Paimon 的内部行连接起来。
 public class ScanRecordWrapper implements InternalRow {
 
     private final com.alibaba.fluss.record.RowKind rowKind;

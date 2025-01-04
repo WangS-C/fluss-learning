@@ -26,7 +26,6 @@ import com.alibaba.fluss.connector.flink.source.split.SourceSplitBase;
 import com.alibaba.fluss.metadata.PartitionInfo;
 import com.alibaba.fluss.metadata.TableBucket;
 import com.alibaba.fluss.metadata.TablePath;
-
 import org.apache.paimon.CoreOptions;
 import org.apache.paimon.catalog.Catalog;
 import org.apache.paimon.catalog.Identifier;
@@ -39,7 +38,6 @@ import org.apache.paimon.table.FileStoreTable;
 import org.apache.paimon.table.source.InnerTableScan;
 
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -81,6 +79,7 @@ public class LakeSplitGenerator {
 
     public List<SourceSplitBase> generateLakeSplits() throws Exception {
         // get the file store
+        // 获取文件存储
         LakeTableSnapshotInfo lakeSnapshotInfo = flussAdmin.getLakeTableSnapshot(tablePath).get();
         FileStoreTable fileStoreTable =
                 getTable(
@@ -104,6 +103,7 @@ public class LakeSplitGenerator {
                     partitionNameById);
         } else {
             // non-partitioned table
+            // 非分区表
             return generateNoPartitionedTableSplit(
                     isLogTable, fileStoreTable, lakeSnapshotInfo.getTableBucketsOffset());
         }
@@ -148,6 +148,8 @@ public class LakeSplitGenerator {
             // it's log table, we don't care about bucket, and we can't get bucket in paimon's
             // dynamic bucket; so first generate split for the whole paimon snapshot,
             // then generate log split for each bucket paimon snapshot + fluss log
+            //这是日志表，我们不关心桶，也无法在 paimon 的动态桶中获取桶；
+            // 因此，首先为整个 paimon 快照生成分割，然后为每个桶生成日志分割 paimon 快照 + fluss 日志
             splits.addAll(
                     generateSplitForLogSnapshot(
                             fileStoreTable, splitGenerator, partitionId, partitionName));
@@ -157,11 +159,13 @@ public class LakeSplitGenerator {
                 long stoppingOffset = bucketEndOffset.get(bucket);
                 if (snapshotLogOffset == null) {
                     // no any data commit to this bucket, scan from fluss log
+                    // 没有任何数据提交到此数据桶，从 Fluss 日志中扫描
                     splits.add(
                             new LogSplit(
                                     tableBucket, partitionName, EARLIEST_OFFSET, stoppingOffset));
                 } else {
                     // need to read remain fluss log
+                    // 需要阅读留痕日志
                     if (snapshotLogOffset < stoppingOffset) {
                         splits.add(
                                 new LogSplit(
@@ -174,6 +178,7 @@ public class LakeSplitGenerator {
             }
         } else {
             // it's primary key table
+            // 是主键表
             for (int bucket = 0; bucket < bucketCount; bucket++) {
                 TableBucket tableBucket = new TableBucket(tableId, partitionId, bucket);
                 Long snapshotLogOffset = tableBucketSnapshotLogOffset.get(tableBucket);
@@ -199,14 +204,17 @@ public class LakeSplitGenerator {
             @Nullable String partitionName) {
         List<SourceSplitBase> splits = new ArrayList<>();
         // paimon snapshot
+        // paimon快照
         InnerTableScan scan = fileStoreTable.newScan();
         if (partitionName != null) {
             scan = scan.withPartitionFilter(getPartitionSpec(fileStoreTable, partitionName));
         }
         // for snapshot splits, we always use bucket = -1 ad the bucket since we can't get bucket in
         // paimon's log table
+        //对于快照分割，我们总是使用 bucket = -1 作为 bucket，因为我们无法在 paimon 的日志表中获取 bucket
         TableBucket tableBucket = new TableBucket(tableId, partitionId, -1);
         // snapshot splits + one log split
+        // 快照分割 + 一个log分割
         for (FileStoreSourceSplit fileStoreSourceSplit : splitGenerator.createSplits(scan.plan())) {
             splits.add(new PaimonSnapshotSplit(tableBucket, partitionName, fileStoreSourceSplit));
         }
@@ -235,6 +243,7 @@ public class LakeSplitGenerator {
 
         // no snapshot data for this bucket or no a corresponding log offset in this bucket,
         // can only scan from change log
+        //该数据桶没有快照数据，或该数据桶中没有相应的日志偏移量，只能从更改日志中扫描
         if (snapshotLogOffset == null || snapshotLogOffset < 0) {
             return new PaimonSnapshotAndFlussLogSplit(
                     tableBucket, partitionName, null, EARLIEST_OFFSET, stoppingOffset);
@@ -243,6 +252,7 @@ public class LakeSplitGenerator {
         // then, generate a split contains
         // snapshot and change log so that we can merge change log and snapshot
         // to get the full data
+        //然后，生成一个包含快照和更改日志的分割，这样我们就可以合并更改日志和快照，从而获得完整的数据
         fileStoreTable =
                 fileStoreTable.copy(
                         Collections.singletonMap(
@@ -276,6 +286,7 @@ public class LakeSplitGenerator {
             Map<TableBucket, Long> tableBucketSnapshotLogOffset) {
         // iterate all bucket
         // assume bucket is from 0 to bucket count
+        //遍历所有桶，假设桶从 0 到桶数
         Map<Integer, Long> bucketEndOffset =
                 stoppingOffsetInitializer.getBucketOffsets(
                         null,
@@ -293,7 +304,7 @@ public class LakeSplitGenerator {
     private FileStoreTable getTable(long snapshotId, Map<String, String> catalogProperties)
             throws Exception {
         try (Catalog catalog =
-                FlinkCatalogFactory.createPaimonCatalog(Options.fromMap(catalogProperties))) {
+                     FlinkCatalogFactory.createPaimonCatalog(Options.fromMap(catalogProperties))) {
             return (FileStoreTable)
                     catalog.getTable(
                                     Identifier.create(

@@ -27,7 +27,6 @@ import com.alibaba.fluss.connector.flink.source.reader.SplitSkipReader;
 import com.alibaba.fluss.connector.flink.source.split.SourceSplitBase;
 import com.alibaba.fluss.lakehouse.LakeStorageInfo;
 import com.alibaba.fluss.metadata.TablePath;
-
 import org.apache.flink.util.ExceptionUtils;
 import org.apache.flink.util.FlinkRuntimeException;
 import org.apache.paimon.catalog.Catalog;
@@ -38,11 +37,13 @@ import org.apache.paimon.table.FileStoreTable;
 import org.apache.paimon.table.source.ReadBuilder;
 
 import javax.annotation.Nullable;
-
 import java.util.Queue;
 import java.util.stream.IntStream;
 
-/** A generator to generate reader for lake split. */
+/**
+ * A generator to generate reader for lake split.
+ */
+//为数据湖分割生成阅读器的生成器。
 public class LakeSplitReaderGenerator {
 
     private final Table table;
@@ -112,7 +113,7 @@ public class LakeSplitReaderGenerator {
                 // only read the field in origin fluss table, not include log_offset, log_timestamp
                 // fields
                 : IntStream.range(0, flussTable.getDescriptor().getSchema().getColumnNames().size())
-                        .toArray();
+                .toArray();
     }
 
     private FileStoreTable getFileStoreTable() {
@@ -123,8 +124,8 @@ public class LakeSplitReaderGenerator {
         try (Admin admin = connection.getAdmin()) {
             LakeStorageInfo dataLakeInfo = admin.describeLakeStorage().get();
             try (Catalog paimonCatalog =
-                    FlinkCatalogFactory.createPaimonCatalog(
-                            Options.fromMap(dataLakeInfo.getCatalogProperties()))) {
+                         FlinkCatalogFactory.createPaimonCatalog(
+                                 Options.fromMap(dataLakeInfo.getCatalogProperties()))) {
                 fileStoreTable =
                         (FileStoreTable)
                                 paimonCatalog.getTable(

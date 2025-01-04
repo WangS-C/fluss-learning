@@ -24,9 +24,7 @@ import com.alibaba.fluss.shaded.curator5.org.apache.curator.retry.RetryNTimes;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-/**
- * An implementation of {@link SequenceIDCounter} with zookeeper.
- */
+/** An implementation of {@link SequenceIDCounter} with zookeeper. */
 @ThreadSafe
 public class ZkSequenceIDCounter implements SequenceIDCounter {
 
@@ -49,9 +47,9 @@ public class ZkSequenceIDCounter implements SequenceIDCounter {
      *
      * @return The previous sequence ID
      */
-    //原子递增当前序列 ID。
-    //返回：
-    //前一个序列 ID
+    // 原子递增当前序列 ID。
+    // 返回：
+    // 前一个序列 ID
     @Override
     public long getAndIncrement() throws Exception {
         AtomicValue<Long> incrementValue = sequenceIdCounter.increment();

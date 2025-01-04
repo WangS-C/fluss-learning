@@ -55,6 +55,7 @@ import static com.alibaba.fluss.connector.flink.catalog.FlinkCatalog.LAKE_TABLE_
 import static org.apache.flink.configuration.ConfigOptions.key;
 
 /** Factory to create table source and table sink for Fluss. */
+// 工厂为Fluss创建tableSource和tableSink。
 public class FlinkTableFactory implements DynamicTableSourceFactory, DynamicTableSinkFactory {
 
     private volatile LakeTableFactory lakeTableFactory;
@@ -62,10 +63,12 @@ public class FlinkTableFactory implements DynamicTableSourceFactory, DynamicTabl
     @Override
     public DynamicTableSource createDynamicTableSource(Context context) {
         // check whether should read from datalake
+        // 检查是否应从数据湖读取数据
         ObjectIdentifier tableIdentifier = context.getObjectIdentifier();
         String tableName = tableIdentifier.getObjectName();
         if (tableName.contains(LAKE_TABLE_SPLITTER)) {
             tableName = tableName.substring(0, tableName.indexOf(LAKE_TABLE_SPLITTER));
+            // 初始化LakeTable工厂
             lakeTableFactory = mayInitLakeTableFactory();
             return lakeTableFactory.createDynamicTableSource(context, tableName);
         }
@@ -73,6 +76,7 @@ public class FlinkTableFactory implements DynamicTableSourceFactory, DynamicTabl
         FactoryUtil.TableFactoryHelper helper = FactoryUtil.createTableFactoryHelper(this, context);
         helper.validate();
 
+        // 是否流模式
         boolean isStreamingMode =
                 context.getConfiguration().get(ExecutionOptions.RUNTIME_MODE)
                         == RuntimeExecutionMode.STREAMING;
@@ -93,6 +97,7 @@ public class FlinkTableFactory implements DynamicTableSourceFactory, DynamicTabl
         RowType tableOutputType = (RowType) context.getPhysicalRowDataType().getLogicalType();
 
         // options for lookup
+        // 查询选项
         LookupCache cache = null;
 
         LookupOptions.LookupCacheType lookupCacheType = tableOptions.get(LookupOptions.CACHE_TYPE);
@@ -103,6 +108,8 @@ public class FlinkTableFactory implements DynamicTableSourceFactory, DynamicTabl
             // currently, flink framework only support InputFormatProvider
             // as ScanRuntimeProviders for Full caching lookup join, so in here, we just throw
             // unsupported exception
+            // 目前，flink 框架只支持将 InputFormatProvider 作为 ScanRuntimeProviders 用于全缓存查找连接，
+            // 因此在这里，我们只需抛出不支持的异常即可
             throw new UnsupportedOperationException("Full lookup caching is not supported yet.");
         }
 
@@ -173,6 +180,7 @@ public class FlinkTableFactory implements DynamicTableSourceFactory, DynamicTabl
                                 LookupOptions.PARTIAL_CACHE_CACHE_MISSING_KEY,
                                 LookupOptions.PARTIAL_CACHE_MAX_ROWS));
         // forward all fluss table and client options
+        // 转发所有的fluss table和client选项
         options.addAll(FlinkConnectorOptions.TABLE_OPTIONS);
         options.addAll(FlinkConnectorOptions.CLIENT_OPTIONS);
         return options;
@@ -185,6 +193,7 @@ public class FlinkTableFactory implements DynamicTableSourceFactory, DynamicTabl
                 ConfigOptions.BOOTSTRAP_SERVERS.key(),
                 tableOptions.get(FlinkConnectorOptions.BOOTSTRAP_SERVERS));
         // forward all client configs
+        // 转发所有客户端配置
         for (ConfigOption<?> option : FlinkConnectorOptions.CLIENT_OPTIONS) {
             if (tableOptions.get(option) != null) {
                 flussConfig.setString(option.key(), tableOptions.get(option).toString());
@@ -192,6 +201,7 @@ public class FlinkTableFactory implements DynamicTableSourceFactory, DynamicTabl
         }
 
         // pass flink io tmp dir to fluss client.
+        // 将 flink io tmp 目录传递给 fluss 客户端。
         flussConfig.setString(
                 ConfigOptions.CLIENT_SCANNER_IO_TMP_DIR,
                 new File(flinkConfig.get(CoreOptions.TMP_DIRS), "/fluss").getAbsolutePath());
@@ -202,6 +212,7 @@ public class FlinkTableFactory implements DynamicTableSourceFactory, DynamicTabl
         return TablePath.of(tablePath.getDatabaseName(), tablePath.getObjectName());
     }
 
+    // 初始化LakeTable工厂
     private LakeTableFactory mayInitLakeTableFactory() {
         if (lakeTableFactory == null) {
             synchronized (this) {

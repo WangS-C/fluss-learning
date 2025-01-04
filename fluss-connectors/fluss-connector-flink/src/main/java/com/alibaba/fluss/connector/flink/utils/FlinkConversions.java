@@ -30,6 +30,7 @@ import com.alibaba.fluss.types.DataType;
 import com.alibaba.fluss.types.RowType;
 import com.alibaba.fluss.utils.StringUtils;
 import com.alibaba.fluss.utils.TimeUtils;
+
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.catalog.CatalogTable;
 import org.apache.flink.table.catalog.Column;
@@ -51,58 +52,45 @@ import static com.alibaba.fluss.connector.flink.FlinkConnectorOptions.BUCKET_KEY
 import static com.alibaba.fluss.connector.flink.FlinkConnectorOptions.BUCKET_NUMBER;
 import static org.apache.flink.table.factories.FactoryUtil.CONNECTOR;
 
-/**
- * Utils for conversion between Flink and Fluss.
- */
+/** Utils for conversion between Flink and Fluss. */
 public class FlinkConversions {
 
-    private FlinkConversions() {
-    }
+    private FlinkConversions() {}
 
-    /**
-     * Convert Fluss's type to Flink's type.
-     */
+    /** Convert Fluss's type to Flink's type. */
     @VisibleForTesting
     public static org.apache.flink.table.types.DataType toFlinkType(DataType flussDataType) {
         return flussDataType.accept(FlussTypeToFlinkType.INSTANCE);
     }
 
-    /**
-     * Convert Fluss's RowType to Flink's RowType.
-     */
+    /** Convert Fluss's RowType to Flink's RowType. */
     public static org.apache.flink.table.types.logical.RowType toFlinkRowType(
             RowType flussRowType) {
         return (org.apache.flink.table.types.logical.RowType)
                 flussRowType.accept(FlussTypeToFlinkType.INSTANCE).getLogicalType();
     }
 
-    /**
-     * Convert Flink's physical type to Fluss' type.
-     */
+    /** Convert Flink's physical type to Fluss' type. */
     @VisibleForTesting
     public static DataType toFlussType(org.apache.flink.table.types.DataType flinkDataType) {
         return flinkDataType.getLogicalType().accept(FlinkTypeToFlussType.INSTANCE);
     }
 
-    /**
-     * Convert Flink's RowType to Fluss' RowType.
-     */
+    /** Convert Flink's RowType to Fluss' RowType. */
     public static RowType toFlussRowType(
             org.apache.flink.table.types.logical.RowType flinkRowType) {
         return (RowType) flinkRowType.accept(FlinkTypeToFlussType.INSTANCE);
     }
 
-    /**
-     * Convert Fluss's table to Flink's table.
-     */
-    //将 Fluss 表转换为 Flink 表。
+    /** Convert Fluss's table to Flink's table. */
+    // 将 Fluss 表转换为 Flink 表。
     public static CatalogTable toFlinkTable(TableInfo tableInfo) {
         TableDescriptor tableDescriptor = tableInfo.getTableDescriptor();
         Map<String, String> newOptions =
                 new HashMap<>(tableInfo.getTableDescriptor().getCustomProperties());
 
         // put fluss table properties into flink options, to make the properties visible to users
-        //将 fluss 表格属性放到 flink 选项中，使用户可以看到这些属性
+        // 将 fluss 表格属性放到 flink 选项中，使用户可以看到这些属性
         convertFlussTablePropertiesToFlinkOptions(
                 tableInfo.getTableDescriptor().getProperties(), newOptions);
 
@@ -123,7 +111,7 @@ public class FlinkConversions {
         int columnCount =
                 physicalColumns.size()
                         + CatalogPropertiesUtils.nonPhysicalColumnsCount(
-                        newOptions, physicalColumns);
+                                newOptions, physicalColumns);
 
         int physicalColumnIndex = 0;
         for (int i = 0; i < columnCount; i++) {
@@ -171,10 +159,8 @@ public class FlinkConversions {
                 CatalogPropertiesUtils.deserializeOptions(newOptions));
     }
 
-    /**
-     * Convert Flink's table to Fluss's table.
-     */
-    //将 Flink 表格转换为 Fluss 表格。
+    /** Convert Flink's table to Fluss's table. */
+    // 将 Flink 表格转换为 Fluss 表格。
     public static TableDescriptor toFlussTable(ResolvedCatalogTable catalogTable) {
         Configuration flinkTableConf = Configuration.fromMap(catalogTable.getOptions());
         String connector = flinkTableConf.get(CONNECTOR);
@@ -268,9 +254,7 @@ public class FlinkConversions {
                 .build();
     }
 
-    /**
-     * Convert Fluss's ConfigOptions to Flink's ConfigOptions.
-     */
+    /** Convert Fluss's ConfigOptions to Flink's ConfigOptions. */
     public static List<org.apache.flink.configuration.ConfigOption<?>> toFlinkOptions(
             Collection<ConfigOption<?>> flussOption) {
         return flussOption.stream()
@@ -278,9 +262,7 @@ public class FlinkConversions {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Convert Fluss's ConfigOption to Flink's ConfigOption.
-     */
+    /** Convert Fluss's ConfigOption to Flink's ConfigOption. */
     public static org.apache.flink.configuration.ConfigOption<?> toFlinkOption(
             ConfigOption<?> flussOption) {
         org.apache.flink.configuration.ConfigOptions.OptionBuilder builder =

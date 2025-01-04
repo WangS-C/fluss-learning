@@ -29,9 +29,7 @@ import com.alibaba.fluss.rpc.protocol.RPC;
 
 import java.util.concurrent.CompletableFuture;
 
-/**
- * The gateway interface between the client and the server for reading and writing metadata.
- */
+/** The gateway interface between the client and the server for reading and writing metadata. */
 public interface AdminGateway extends AdminReadOnlyGateway {
     /**
      * Create a database.
@@ -56,9 +54,9 @@ public interface AdminGateway extends AdminReadOnlyGateway {
      *
      * @param request the request to create table.
      */
-    //创建新表。
-    //参数：
-    //request- 创建表格的请求。
+    // 创建新表。
+    // 参数：
+    // request- 创建表格的请求。
     @RPC(api = ApiKeys.CREATE_TABLE)
     CompletableFuture<CreateTableResponse> createTable(CreateTableRequest request);
 

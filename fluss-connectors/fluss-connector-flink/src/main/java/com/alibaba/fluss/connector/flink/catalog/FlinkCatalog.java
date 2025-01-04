@@ -30,6 +30,7 @@ import com.alibaba.fluss.metadata.TableInfo;
 import com.alibaba.fluss.metadata.TablePath;
 import com.alibaba.fluss.utils.ExceptionUtils;
 import com.alibaba.fluss.utils.IOUtils;
+
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogBaseTable;
 import org.apache.flink.table.catalog.CatalogDatabase;
@@ -60,6 +61,7 @@ import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.factories.Factory;
 
 import javax.annotation.Nullable;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -69,11 +71,20 @@ import java.util.Optional;
 import static com.alibaba.fluss.config.ConfigOptions.BOOTSTRAP_SERVERS;
 import static org.apache.flink.util.Preconditions.checkArgument;
 
-/**
- * A Flink Catalog for fluss.
- */
+/** A Flink Catalog for fluss. */
 public class FlinkCatalog implements Catalog {
 
+    // 查询SQL 表名后加此后缀
+    /*
+     * https://alibaba.github.io/fluss-docs/docs/streaming-lakehouse/integrate-data-lakes/paimon/
+     * -- assume we have a table named `orders`
+     *
+     * -- read from paimon
+     * SELECT COUNT(*) FROM orders$lake;
+     *
+     * -- we can also query the system tables
+     * SELECT * FROM orders$lake$snapshots;
+     */
     public static final String LAKE_TABLE_SPLITTER = "$lake";
 
     private final ClassLoader classLoader;
@@ -286,7 +297,7 @@ public class FlinkCatalog implements Catalog {
             tableName = tableComponents[0];
         } else {
             // be some thing like table_name$lake$snapshot
-            //类似于 table_name$lake$snapshot
+            // 类似于 table_name$lake$snapshot
             tableName = String.join("", tableComponents);
         }
         return lakeCatalog.getTable(new ObjectPath(databaseName, tableName));
@@ -373,7 +384,7 @@ public class FlinkCatalog implements Catalog {
     public List<CatalogPartitionSpec> listPartitions(
             ObjectPath objectPath, CatalogPartitionSpec catalogPartitionSpec)
             throws TableNotExistException, TableNotPartitionedException,
-            PartitionSpecInvalidException, CatalogException {
+                    PartitionSpecInvalidException, CatalogException {
         throw new UnsupportedOperationException();
     }
 
@@ -404,8 +415,8 @@ public class FlinkCatalog implements Catalog {
             CatalogPartition catalogPartition,
             boolean b)
             throws TableNotExistException, TableNotPartitionedException,
-            PartitionSpecInvalidException, PartitionAlreadyExistsException,
-            CatalogException {
+                    PartitionSpecInvalidException, PartitionAlreadyExistsException,
+                    CatalogException {
         throw new UnsupportedOperationException();
     }
 

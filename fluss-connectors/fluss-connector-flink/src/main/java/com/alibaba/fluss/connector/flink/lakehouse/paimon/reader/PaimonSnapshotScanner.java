@@ -19,7 +19,6 @@ package com.alibaba.fluss.connector.flink.lakehouse.paimon.reader;
 import com.alibaba.fluss.client.scanner.ScanRecord;
 import com.alibaba.fluss.connector.flink.source.reader.SplitScanner;
 import com.alibaba.fluss.utils.CloseableIterator;
-
 import org.apache.paimon.data.InternalRow;
 import org.apache.paimon.flink.source.FileStoreSourceSplit;
 import org.apache.paimon.reader.RecordReader;
@@ -27,16 +26,19 @@ import org.apache.paimon.table.source.Split;
 import org.apache.paimon.table.source.TableRead;
 
 import javax.annotation.Nullable;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Objects;
 
-/** A scanner for reading paimon split. Most logic is copied from paimon. */
+/**
+ * A scanner for reading paimon split. Most logic is copied from paimon.
+ */
+//用于读取 paimon 分割的扫描器。大部分逻辑都是从 paimon 复制过来的。
 public class PaimonSnapshotScanner implements SplitScanner {
 
     private final TableRead tableRead;
-    @Nullable private LazyRecordReader currentReader;
+    @Nullable
+    private LazyRecordReader currentReader;
 
     public PaimonSnapshotScanner(TableRead tableRead, FileStoreSourceSplit fileStoreSourceSplit) {
         this.tableRead = tableRead;
@@ -103,7 +105,9 @@ public class PaimonSnapshotScanner implements SplitScanner {
         }
     }
 
-    /** Lazy to create {@link RecordReader} to improve performance for limit. */
+    /**
+     * Lazy to create {@link RecordReader} to improve performance for limit.
+     */
     private class LazyRecordReader {
         private final Split split;
         private RecordReader<InternalRow> lazyRecordReader;

@@ -38,6 +38,7 @@ import com.alibaba.fluss.rpc.messages.PbTableMetadata;
 import com.alibaba.fluss.rpc.messages.PbTablePath;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,9 +48,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-/**
- * Utils for metadata for client.
- */
+/** Utils for metadata for client. */
 public class MetadataUtils {
 
     private static final Random randOffset = new Random();
@@ -91,9 +90,7 @@ public class MetadataUtils {
                 gateway, true, cluster, tablePaths, tablePartitionNames, tablePartitionIds);
     }
 
-    /**
-     * maybe partial update cluster.
-     */
+    /** maybe partial update cluster. */
     // 也许是部分更新集群。
     public static Cluster sendMetadataRequestAndRebuildCluster(
             AdminReadOnlyGateway gateway,

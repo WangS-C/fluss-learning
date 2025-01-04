@@ -23,7 +23,10 @@ import com.alibaba.fluss.connector.flink.lakehouse.paimon.split.PaimonSnapshotSp
 import com.alibaba.fluss.connector.flink.source.split.SourceSplitBase;
 import com.alibaba.fluss.connector.flink.source.split.SourceSplitState;
 
-/** The state initializer for lake split. */
+/**
+ * The state initializer for lake split.
+ */
+//lake split的状态初始值设定项
 public class LakeSplitStateInitializer {
 
     public static SourceSplitState initializedState(SourceSplitBase split) {

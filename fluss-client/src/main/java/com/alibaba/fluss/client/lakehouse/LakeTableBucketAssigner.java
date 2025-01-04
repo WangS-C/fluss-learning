@@ -24,18 +24,17 @@ import com.alibaba.fluss.row.InternalRow;
 import com.alibaba.fluss.types.RowType;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 
-/**
- * A bucket assigner for table with data lake enabled.
- */
+/** A bucket assigner for table with data lake enabled. */
 // 启用了数据湖的表的数据桶分配器。
 public class LakeTableBucketAssigner implements BucketAssigner {
 
     // the bucket extractor of bucket, fluss will use the the bucket
     // that paimon assign to align with paimon when data lake is enabled
     // todo: make it pluggable
-    //当启用数据湖时，fluss 将使用 paimon 分配的桶提取器与 paimon 保持一致
+    // 当启用数据湖时，fluss 将使用 paimon 分配的桶提取器与 paimon 保持一致
     private final PaimonBucketAssigner paimonBucketAssigner;
 
     public LakeTableBucketAssigner(TableDescriptor tableDescriptor, int bucketNum) {

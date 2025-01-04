@@ -27,7 +27,7 @@ import com.alibaba.fluss.annotation.Internal;
  */
 // 模式信息包括模式和模式 ID，模式 ID 代表表模式的唯一标识符。
 // 这可以确保每次模式更改都有唯一的模式标识符。
-//每个表的模式标识符从 1 开始，每次模式变更都递增 1。
+// 每个表的模式标识符从 1 开始，每次模式变更都递增 1。
 @Internal
 public final class SchemaInfo {
     private final Schema schema;

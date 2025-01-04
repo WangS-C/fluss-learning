@@ -28,6 +28,7 @@ import com.alibaba.fluss.utils.json.JsonSerdeUtils;
 import com.alibaba.fluss.utils.json.TableDescriptorJsonSerde;
 
 import javax.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +55,7 @@ import static java.util.Collections.unmodifiableMap;
  * @since 0.1
  */
 // 代表 Fluss 中表格的元数据。
-//它包含可在 SQLCREATE TABLE语句中表达的所有特征，如模式、主键、分区键、桶键和选项。
+// 它包含可在 SQLCREATE TABLE语句中表达的所有特征，如模式、主键、分区键、桶键和选项。
 @PublicEvolving
 public final class TableDescriptor implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -66,9 +67,7 @@ public final class TableDescriptor implements Serializable {
     private final Map<String, String> properties;
     private final Map<String, String> customProperties;
 
-    /**
-     * The cached Configuration object for the {@link #properties}.
-     */
+    /** The cached Configuration object for the {@link #properties}. */
     private transient Configuration config;
 
     private transient AutoPartitionStrategy autoPartitionStrategy;
@@ -138,23 +137,17 @@ public final class TableDescriptor implements Serializable {
         }
     }
 
-    /**
-     * Creates a builder for building table descriptor.
-     */
+    /** Creates a builder for building table descriptor. */
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Creates a builder based on an existing TableDescriptor.
-     */
+    /** Creates a builder based on an existing TableDescriptor. */
     public static Builder builder(TableDescriptor origin) {
         return new Builder(origin);
     }
 
-    /**
-     * Returns the {@link Schema} of the table.
-     */
+    /** Returns the {@link Schema} of the table. */
     public Schema getSchema() {
         return schema;
     }
@@ -170,16 +163,14 @@ public final class TableDescriptor implements Serializable {
      *
      * @return true if the table is partitioned; otherwise, false
      */
-    //检查表是否已分区。
-    //返回值
-    //如果表已分区，则返回 true；否则返回 false
+    // 检查表是否已分区。
+    // 返回值
+    // 如果表已分区，则返回 true；否则返回 false
     public boolean isPartitioned() {
         return !partitionKeys.isEmpty();
     }
 
-    /**
-     * Check if the table has primary key or not.
-     */
+    /** Check if the table has primary key or not. */
     public boolean hasPrimaryKey() {
         return schema.getPrimaryKey().isPresent();
     }
@@ -194,10 +185,8 @@ public final class TableDescriptor implements Serializable {
         return partitionKeys;
     }
 
-    /**
-     * Returns the distribution of the table if the {@code DISTRIBUTED} clause is defined.
-     */
-    //如果定义了DISTRIBUTED子句，则返回表的分布情况。
+    /** Returns the distribution of the table if the {@code DISTRIBUTED} clause is defined. */
+    // 如果定义了DISTRIBUTED子句，则返回表的分布情况。
     public Optional<TableDistribution> getTableDistribution() {
         return Optional.ofNullable(tableDistribution);
     }
@@ -222,9 +211,7 @@ public final class TableDescriptor implements Serializable {
         return customProperties;
     }
 
-    /**
-     * Gets the replication factor of the table.
-     */
+    /** Gets the replication factor of the table. */
     public int getReplicationFactor(int defaultReplicas) {
         return configuration()
                 .getOptional(ConfigOptions.TABLE_REPLICATION_FACTOR)
@@ -238,38 +225,28 @@ public final class TableDescriptor implements Serializable {
         return autoPartitionStrategy;
     }
 
-    /**
-     * Gets the log format of the table.
-     */
+    /** Gets the log format of the table. */
     public LogFormat getLogFormat() {
         return configuration().get(ConfigOptions.TABLE_LOG_FORMAT);
     }
 
-    /**
-     * Gets the kv format of the table.
-     */
+    /** Gets the kv format of the table. */
     public KvFormat getKvFormat() {
         return configuration().get(ConfigOptions.TABLE_KV_FORMAT);
     }
 
-    /**
-     * Gets the log TTL of the table.
-     */
+    /** Gets the log TTL of the table. */
     public long getLogTTLMs() {
         return configuration().get(ConfigOptions.TABLE_LOG_TTL).toMillis();
     }
 
-    /**
-     * Gets the local segments to retain for tiered log of the table.
-     */
+    /** Gets the local segments to retain for tiered log of the table. */
     public int getTieredLogLocalSegments() {
         return configuration().get(ConfigOptions.TABLE_TIERED_LOG_LOCAL_SEGMENTS);
     }
 
-    /**
-     * Whether the data lake is enabled.
-     */
-    //数据湖是否已启用。
+    /** Whether the data lake is enabled. */
+    // 数据湖是否已启用。
     public boolean isDataLakeEnabled() {
         return configuration().get(ConfigOptions.TABLE_DATALAKE_ENABLED);
     }
@@ -423,9 +400,7 @@ public final class TableDescriptor implements Serializable {
         }
     }
 
-    /**
-     * The default bucket key of primary key table is the primary key excluding partition keys.
-     */
+    /** The default bucket key of primary key table is the primary key excluding partition keys. */
     private static List<String> defaultBucketKeyOfPrimaryKeyTable(
             Schema schema, List<String> partitionKeys) {
         checkArgument(schema.getPrimaryKey().isPresent(), "Primary key must be set.");
@@ -495,9 +470,7 @@ public final class TableDescriptor implements Serializable {
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Builder for {@link TableDescriptor}.
-     */
+    /** Builder for {@link TableDescriptor}. */
     @PublicEvolving
     public static class Builder {
 
@@ -523,25 +496,19 @@ public final class TableDescriptor implements Serializable {
             this.tableDistribution = descriptor.getTableDistribution().orElse(null);
         }
 
-        /**
-         * Define the schema of the {@link TableDescriptor}.
-         */
+        /** Define the schema of the {@link TableDescriptor}. */
         public Builder schema(Schema schema) {
             this.schema = schema;
             return this;
         }
 
-        /**
-         * Sets the log format of the table.
-         */
+        /** Sets the log format of the table. */
         public Builder logFormat(LogFormat logFormat) {
             property(ConfigOptions.TABLE_LOG_FORMAT, logFormat);
             return this;
         }
 
-        /**
-         * Sets the kv format of the table.
-         */
+        /** Sets the kv format of the table. */
         public Builder kvFormat(KvFormat kvFormat) {
             property(ConfigOptions.TABLE_KV_FORMAT, kvFormat);
             return this;
@@ -610,16 +577,12 @@ public final class TableDescriptor implements Serializable {
             return this;
         }
 
-        /**
-         * Define which columns this table is partitioned by.
-         */
+        /** Define which columns this table is partitioned by. */
         public Builder partitionedBy(String... partitionKeys) {
             return partitionedBy(Arrays.asList(partitionKeys));
         }
 
-        /**
-         * Define which columns this table is partitioned by.
-         */
+        /** Define which columns this table is partitioned by. */
         public Builder partitionedBy(List<String> partitionKeys) {
             this.partitionKeys.clear();
             this.partitionKeys.addAll(partitionKeys);
@@ -648,17 +611,13 @@ public final class TableDescriptor implements Serializable {
             return this;
         }
 
-        /**
-         * Define the comment for this table.
-         */
+        /** Define the comment for this table. */
         public Builder comment(@Nullable String comment) {
             this.comment = comment;
             return this;
         }
 
-        /**
-         * Returns an immutable instance of {@link TableDescriptor}.
-         */
+        /** Returns an immutable instance of {@link TableDescriptor}. */
         public TableDescriptor build() {
             return new TableDescriptor(
                     schema,

@@ -90,10 +90,12 @@ import com.alibaba.fluss.server.zk.data.LakeTableSnapshot;
 import com.alibaba.fluss.server.zk.data.LeaderAndIsr;
 import com.alibaba.fluss.server.zk.data.TableAssignment;
 import com.alibaba.fluss.utils.Preconditions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -126,8 +128,7 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
     private long tokenLastUpdateTimeMs = 0;
     private ObtainedSecurityToken securityToken = null;
 
-    private @Nullable
-    final LakeStorageInfo lakeStorageInfo;
+    private @Nullable final LakeStorageInfo lakeStorageInfo;
 
     public RpcServiceBase(
             Configuration config,
@@ -243,13 +244,13 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
             TablePath tablePath = toTablePath(pbTablePath);
             tablePaths.add(tablePath);
             tableMetadataInfos.add(
-                    //获取 TableMetadataInfo包含tablePath的表信息和physicalTablePaths 的数据桶位置。
+                    // 获取 TableMetadataInfo包含tablePath的表信息和physicalTablePaths 的数据桶位置。
                     getTableMetadata(tablePath));
         }
 
         for (PbPhysicalTablePath partitionPath : partitions) {
             partitionMetadataInfos.add(
-                    //获取表的分区信息。
+                    // 获取表的分区信息。
                     getPartitionMetadata(RpcMessageUtils.toPhysicalTablePath(partitionPath)));
         }
 
@@ -259,12 +260,12 @@ public abstract class RpcServiceBase extends RpcGatewayService implements AdminR
 
         return CompletableFuture.completedFuture(
                 new ClusterMetadataInfo(
-                        metadataCache.getCoordinatorServer() == null
-                                ? Optional.empty()
-                                : Optional.of(metadataCache.getCoordinatorServer()),
-                        aliveTableServers,
-                        tableMetadataInfos,
-                        partitionMetadataInfos)
+                                metadataCache.getCoordinatorServer() == null
+                                        ? Optional.empty()
+                                        : Optional.of(metadataCache.getCoordinatorServer()),
+                                aliveTableServers,
+                                tableMetadataInfos,
+                                partitionMetadataInfos)
                         .toMetadataResponse());
     }
 

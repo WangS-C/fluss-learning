@@ -19,6 +19,7 @@ package com.alibaba.fluss.cluster;
 import com.alibaba.fluss.annotation.Internal;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,10 +66,8 @@ public interface MetadataCache {
     // 获取所有存活的tablet服务器节点。
     Map<Integer, ServerNode> getAllAliveTabletServers();
 
-    /**
-     * Get ids of all alive tablet server nodes.
-     */
-    //获取所有活着的tablet服务器节点的 ID。
+    /** Get ids of all alive tablet server nodes. */
+    // 获取所有活着的tablet服务器节点的 ID。
     default int[] getLiveServerIds() {
         List<ServerNode> serverNodes = new ArrayList<>(getAllAliveTabletServers().values());
         int[] server = new int[serverNodes.size()];

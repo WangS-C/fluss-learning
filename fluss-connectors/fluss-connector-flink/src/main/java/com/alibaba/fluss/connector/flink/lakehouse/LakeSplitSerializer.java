@@ -21,20 +21,21 @@ import com.alibaba.fluss.connector.flink.lakehouse.paimon.split.PaimonSnapshotSp
 import com.alibaba.fluss.connector.flink.source.split.LogSplit;
 import com.alibaba.fluss.connector.flink.source.split.SourceSplitBase;
 import com.alibaba.fluss.metadata.TableBucket;
-
 import org.apache.flink.core.memory.DataInputDeserializer;
 import org.apache.flink.core.memory.DataOutputSerializer;
 import org.apache.paimon.flink.source.FileStoreSourceSplit;
 import org.apache.paimon.flink.source.FileStoreSourceSplitSerializer;
 
 import javax.annotation.Nullable;
-
 import java.io.IOException;
 
 import static com.alibaba.fluss.connector.flink.lakehouse.paimon.split.PaimonSnapshotAndFlussLogSplit.PAIMON_SNAPSHOT_FLUSS_LOG_SPLIT_KIND;
 import static com.alibaba.fluss.connector.flink.lakehouse.paimon.split.PaimonSnapshotSplit.PAIMON_SNAPSHOT_SPLIT_KIND;
 
-/** A serializer for lake split. */
+/**
+ * A serializer for lake split.
+ */
+//数据湖分割的序列化器。
 public class LakeSplitSerializer {
 
     private final FileStoreSourceSplitSerializer fileStoreSourceSplitSerializer =
@@ -51,12 +52,14 @@ public class LakeSplitSerializer {
             out.write(serializeBytes);
         } else if (split instanceof PaimonSnapshotAndFlussLogSplit) {
             // writing file store source split
+            //写入文件存储源分割
             PaimonSnapshotAndFlussLogSplit paimonSnapshotAndFlussLogSplit =
                     ((PaimonSnapshotAndFlussLogSplit) split);
             FileStoreSourceSplit fileStoreSourceSplit =
                     paimonSnapshotAndFlussLogSplit.getSnapshotSplit();
             if (fileStoreSourceSplit == null) {
                 // no snapshot data for the bucket
+                //桶没有快照数据
                 out.writeBoolean(false);
             } else {
                 out.writeBoolean(true);
@@ -66,6 +69,7 @@ public class LakeSplitSerializer {
                 out.write(serializeBytes);
             }
             // writing starting/stopping offset
+            // 写入起始偏移量
             out.writeLong(paimonSnapshotAndFlussLogSplit.getStartingOffset());
             out.writeLong(
                     paimonSnapshotAndFlussLogSplit

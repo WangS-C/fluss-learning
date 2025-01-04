@@ -30,9 +30,9 @@ import java.util.Objects;
  *
  * @see PartitionAssignmentJsonSerde for json serialization and deserialization.
  */
-//分区分配包括每个数据桶的副本分配。分配以整数列表的形式表示，其中每个整数都是副本 ID（服务器 ID）。
-//与TableAssignment 不同的是，它包含一个tableId，用于了解该分区属于哪个表。
-//分配信息存储在ZkData. PartitionIdZNode 中。
+// 分区分配包括每个数据桶的副本分配。分配以整数列表的形式表示，其中每个整数都是副本 ID（服务器 ID）。
+// 与TableAssignment 不同的是，它包含一个tableId，用于了解该分区属于哪个表。
+// 分配信息存储在ZkData. PartitionIdZNode 中。
 public class PartitionAssignment extends TableAssignment {
 
     private final long tableId;

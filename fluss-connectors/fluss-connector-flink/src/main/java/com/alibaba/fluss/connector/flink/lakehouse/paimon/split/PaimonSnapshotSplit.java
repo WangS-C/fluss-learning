@@ -18,14 +18,15 @@ package com.alibaba.fluss.connector.flink.lakehouse.paimon.split;
 
 import com.alibaba.fluss.connector.flink.source.split.SourceSplitBase;
 import com.alibaba.fluss.metadata.TableBucket;
-
 import org.apache.paimon.flink.source.FileStoreSourceSplit;
 
 import javax.annotation.Nullable;
-
 import java.util.Objects;
 
-/** A split for reading a snapshot of paimon. */
+/**
+ * A split for reading a snapshot of paimon.
+ */
+//读取 paimon 快照的分割线。
 public class PaimonSnapshotSplit extends SourceSplitBase {
 
     public static final byte PAIMON_SNAPSHOT_SPLIT_KIND = -1;

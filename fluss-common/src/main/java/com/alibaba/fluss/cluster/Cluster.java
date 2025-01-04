@@ -25,6 +25,7 @@ import com.alibaba.fluss.metadata.TableInfo;
 import com.alibaba.fluss.metadata.TablePath;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,8 +45,7 @@ import java.util.Optional;
 // 注意: 并非所有表和存储桶都包含在集群中，仅包含writer或scanner使用的表
 @Internal
 public final class Cluster {
-    @Nullable
-    private final ServerNode coordinatorServer;
+    @Nullable private final ServerNode coordinatorServer;
     private final Map<PhysicalTablePath, List<BucketLocation>> availableLocationsByPath;
     private final Map<TableBucket, BucketLocation> availableLocationByBucket;
     private final Map<Integer, ServerNode> aliveTabletServersById;
@@ -55,10 +55,8 @@ public final class Cluster {
     private final Map<PhysicalTablePath, Long> partitionsIdByPath;
     private final Map<Long, String> partitionNameById;
 
-    /**
-     * Only latest schema of table will be put in it.
-     */
-    //只有最新的表模式才会被放入其中。
+    /** Only latest schema of table will be put in it. */
+    // 只有最新的表模式才会被放入其中。
     private final Map<TablePath, TableInfo> tableInfoByPath;
 
     public Cluster(
@@ -151,9 +149,7 @@ public final class Cluster {
         return coordinatorServer;
     }
 
-    /**
-     * @return The known set of alive tablet servers.
-     */
+    /** @return The known set of alive tablet servers. */
     // 返回：已知还活着的tablet服务器集。
     public Map<Integer, ServerNode> getAliveTabletServers() {
         return aliveTabletServersById;
@@ -168,15 +164,13 @@ public final class Cluster {
      *
      * @param tablePath the table path
      * @return the table id, if metadata cache contains the table path, return the table path,
-     * otherwise return {@link TableInfo#UNKNOWN_TABLE_ID}
+     *     otherwise return {@link TableInfo#UNKNOWN_TABLE_ID}
      */
     public long getTableId(TablePath tablePath) {
         return tableIdByPath.getOrDefault(tablePath, TableInfo.UNKNOWN_TABLE_ID);
     }
 
-    /**
-     * Get the table path for this table id.
-     */
+    /** Get the table path for this table id. */
     public Optional<TablePath> getTablePath(long tableId) {
         return Optional.ofNullable(pathByTableId.get(tableId));
     }
@@ -211,31 +205,23 @@ public final class Cluster {
                                                 + " in cluster"));
     }
 
-    /**
-     * Get the bucket location for this table-bucket.
-     */
+    /** Get the bucket location for this table-bucket. */
     public Optional<BucketLocation> getBucketLocation(TableBucket tableBucket) {
         return Optional.ofNullable(availableLocationByBucket.get(tableBucket));
     }
 
-    /**
-     * Get alive tablet server by id.
-     */
+    /** Get alive tablet server by id. */
     public Optional<ServerNode> getAliveTabletServerById(int serverId) {
         return Optional.ofNullable(aliveTabletServersById.get(serverId));
     }
 
-    /**
-     * Get the tablet server by id.
-     */
+    /** Get the tablet server by id. */
     @Nullable
     public ServerNode getTabletServer(int id) {
         return aliveTabletServersById.getOrDefault(id, null);
     }
 
-    /**
-     * Get one random tablet server.
-     */
+    /** Get one random tablet server. */
     @Nullable
     public ServerNode getRandomTabletServer() {
         // TODO this method need to get one tablet server according to the load.
@@ -243,32 +229,24 @@ public final class Cluster {
         return !serverNodes.isEmpty() ? serverNodes.get(0) : null;
     }
 
-    /**
-     * Get the list of available buckets for this table/partition.
-     */
+    /** Get the list of available buckets for this table/partition. */
     public List<BucketLocation> getAvailableBucketsForPhysicalTablePath(
             PhysicalTablePath physicalTablePath) {
         return availableLocationsByPath.getOrDefault(physicalTablePath, Collections.emptyList());
     }
 
-    /**
-     * Get the table info for this table.
-     */
+    /** Get the table info for this table. */
     // 获取该表的表信息。
     public Optional<TableInfo> getTable(TablePath tablePath) {
         return Optional.ofNullable(tableInfoByPath.get(tablePath));
     }
 
-    /**
-     * Get the partition id for this partition.
-     */
+    /** Get the partition id for this partition. */
     public Optional<Long> getPartitionId(PhysicalTablePath physicalTablePath) {
         return Optional.ofNullable(partitionsIdByPath.get(physicalTablePath));
     }
 
-    /**
-     * Return whether the cluster contains the given physical table path or not.
-     */
+    /** Return whether the cluster contains the given physical table path or not. */
     public boolean contains(PhysicalTablePath physicalTablePath) {
         if (physicalTablePath.getPartitionName() == null) {
             return getTable(physicalTablePath.getTablePath()).isPresent();
@@ -316,9 +294,7 @@ public final class Cluster {
         return Optional.ofNullable(partitionNameById.get(partitionId));
     }
 
-    /**
-     * Get the latest schema for the given table.
-     */
+    /** Get the latest schema for the given table. */
     public Optional<SchemaInfo> getSchema(TablePath tablePath) {
         return getTable(tablePath)
                 .map(
@@ -328,23 +304,17 @@ public final class Cluster {
                                         tableInfo.getSchemaId()));
     }
 
-    /**
-     * Get the table path to table id map.
-     */
+    /** Get the table path to table id map. */
     public Map<TablePath, Long> getTableIdByPath() {
         return tableIdByPath;
     }
 
-    /**
-     * Get the table info by table.
-     */
+    /** Get the table info by table. */
     public Map<TablePath, TableInfo> getTableInfoByPath() {
         return tableInfoByPath;
     }
 
-    /**
-     * Get the bucket by a physical table path.
-     */
+    /** Get the bucket by a physical table path. */
     public Map<PhysicalTablePath, List<BucketLocation>> getBucketLocationsByPath() {
         return availableLocationsByPath;
     }
@@ -353,9 +323,7 @@ public final class Cluster {
         return partitionsIdByPath;
     }
 
-    /**
-     * Create an empty cluster instance with no nodes and no table-buckets.
-     */
+    /** Create an empty cluster instance with no nodes and no table-buckets. */
     public static Cluster empty() {
         return new Cluster(
                 Collections.emptyMap(),
@@ -366,9 +334,7 @@ public final class Cluster {
                 Collections.emptyMap());
     }
 
-    /**
-     * Get the current leader for the given table-bucket.
-     */
+    /** Get the current leader for the given table-bucket. */
     public @Nullable ServerNode leaderFor(TableBucket tableBucket) {
         BucketLocation location = availableLocationByBucket.get(tableBucket);
         if (location == null) {

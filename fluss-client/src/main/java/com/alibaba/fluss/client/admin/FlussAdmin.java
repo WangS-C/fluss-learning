@@ -58,6 +58,7 @@ import com.alibaba.fluss.rpc.messages.TableExistsResponse;
 import com.alibaba.fluss.rpc.protocol.ApiError;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,7 +76,7 @@ import static com.alibaba.fluss.client.utils.ClientRpcMessageUtils.makeListOffse
  * <p>This class is thread-safe. The API of this class is evolving, see {@link Admin} for details.
  */
 // Admin的默认实现。
-//该类是线程安全的。该类的应用程序接口（API）正在不断发展，详情请查看Admin。
+// 该类是线程安全的。该类的应用程序接口（API）正在不断发展，详情请查看Admin。
 public class FlussAdmin implements Admin {
 
     private final AdminGateway gateway;

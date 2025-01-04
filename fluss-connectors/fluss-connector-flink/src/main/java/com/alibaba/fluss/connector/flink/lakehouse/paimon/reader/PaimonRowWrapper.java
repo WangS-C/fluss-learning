@@ -25,6 +25,7 @@ import com.alibaba.fluss.row.TimestampNtz;
 /**
  * A wrapper for Paimon's InternalRow to bridge the Paimon's InternalRow to Fluss's InternalRow. .
  */
+// Paimon's InternalRow 的包装器，用于连接 Paimon's InternalRow 和 Fluss's InternalRow。.
 public class PaimonRowWrapper implements InternalRow {
     private final org.apache.paimon.data.InternalRow paimonRow;
 

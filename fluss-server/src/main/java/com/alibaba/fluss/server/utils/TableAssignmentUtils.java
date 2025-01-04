@@ -28,10 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-/**
- * Utils for the assignment of tables.
- */
-//用于分配表格的实用程序。
+/** Utils for the assignment of tables. */
+// 用于分配表格的实用程序。
 public class TableAssignmentUtils {
 
     private static final Random rand = new Random();
@@ -109,13 +107,13 @@ public class TableAssignmentUtils {
      *
      * <p>Note: the assignment won't consider rack information currently,
      */
-    //分配表格有两个目的：
-    //在tablet服务器之间平均分配副本
-    //对于分配给特定代理的数据桶，它们的其他副本会分散到其他tablet服务器上。
-    //为了实现复制分配的这一目标，我们
-    //从tablet服务器列表中的随机位置开始，以轮回方式分配每个桶的第一个副本。
-    //以递增方式分配每个数据桶的其余副本。
-    //注意：任务目前不会考虑机架信息、
+    // 分配表格有两个目的：
+    // 在tablet服务器之间平均分配副本
+    // 对于分配给特定代理的数据桶，它们的其他副本会分散到其他tablet服务器上。
+    // 为了实现复制分配的这一目标，我们
+    // 从tablet服务器列表中的随机位置开始，以轮回方式分配每个桶的第一个副本。
+    // 以递增方式分配每个数据桶的其余副本。
+    // 注意：任务目前不会考虑机架信息、
     public static TableAssignment generateAssignment(
             int nBuckets, int replicationFactor, int[] servers)
             throws InvalidReplicationFactorException {

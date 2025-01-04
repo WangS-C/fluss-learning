@@ -33,6 +33,7 @@ public class LakeCatalog {
 
     // currently, only support paimon
     // todo make it pluggable
+    // 目前，仅支持 paimon
     private final FlinkCatalog paimonFlinkCatalog;
 
     public LakeCatalog(

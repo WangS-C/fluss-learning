@@ -76,6 +76,7 @@ import com.alibaba.fluss.utils.CloseableIterator;
 import com.alibaba.fluss.utils.Preconditions;
 
 import javax.annotation.Nullable;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -292,7 +293,7 @@ public class FlussTable implements Table {
                 // last limit number.
                 // 一批日志记录可能比上限多一点，因此我们需要切分最后的上限数字。
                 try (CloseableIterator<LogRecord> logRecordIterator =
-                             logRecordBatch.records(readContext)) {
+                        logRecordBatch.records(readContext)) {
                     while (logRecordIterator.hasNext()) {
                         addScanRecord(
                                 projectedFields,
@@ -335,8 +336,8 @@ public class FlussTable implements Table {
      * partition doesn't exist. If the partition doesn't exist yet after update metadata, it'll
      * throw {@link PartitionNotExistException}.
      */
-    //返回记录所属分区的 ID。
-    //如果分区不存在，它会尝试更新元数据。如果更新元数据后分区仍不存在，则会抛出PartitionNotExistException。
+    // 返回记录所属分区的 ID。
+    // 如果分区不存在，它会尝试更新元数据。如果更新元数据后分区仍不存在，则会抛出PartitionNotExistException。
     private Long getPartitionId(InternalRow row) {
         Preconditions.checkNotNull(keyRowPartitionGetter, "partitionGetter shouldn't be null.");
         String partitionName = keyRowPartitionGetter.getPartition(row);

@@ -22,11 +22,15 @@ import org.apache.flink.table.factories.DynamicTableFactory;
 import org.apache.flink.table.factories.FactoryUtil;
 import org.apache.paimon.flink.FlinkTableFactory;
 
-/** A factory to create {@link DynamicTableSource} for lake table. */
+/**
+ * A factory to create {@link DynamicTableSource} for lake table.
+ */
+// 为数据湖表创建DynamicTableSource的工厂。
 public class LakeTableFactory {
 
     // now, always assume is paimon, todo need to describe lake storage from
     // to know which lake storage used
+    // 现在，总是假设是paimon，需要从湖描述来了解使用的是哪个湖的存储
     private final org.apache.paimon.flink.FlinkTableFactory paimonFlinkTableFactory;
 
     public LakeTableFactory() {

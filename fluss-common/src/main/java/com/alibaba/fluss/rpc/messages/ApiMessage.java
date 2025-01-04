@@ -24,14 +24,12 @@ import com.alibaba.fluss.shaded.netty4.io.netty.buffer.ByteBuf;
  * An object that can serialize itself. The serialization protocol is versioned. Messages also
  * implement toString, equals, and hashCode.
  */
-//可以序列化自身的对象。序列化协议是版本控制的。消息还实现了 toString、equals 和 hashCode。
+// 可以序列化自身的对象。序列化协议是版本控制的。消息还实现了 toString、equals 和 hashCode。
 @Internal
 public interface ApiMessage {
 
-    /**
-     * Gets the total serialized byte array size of the message.
-     */
-    //获取报文序列化字节数组的总大小。
+    /** Gets the total serialized byte array size of the message. */
+    // 获取报文序列化字节数组的总大小。
     int totalSize();
 
     /**
@@ -60,10 +58,10 @@ public interface ApiMessage {
      * <p>Note: the current message will hold the reference of {@link ByteBuf}, please remember to
      * release the {@link ByteBuf} until the message has been fully consumed.
      */
-    //从给定的ByteBuf 反序列化信息。
+    // 从给定的ByteBuf 反序列化信息。
     // 仅对"[可选|必需]字节记录 = ?"（嵌套）字段进行懒惰反序列化（即零拷贝）。
     // 如果发生了懒惰反序列化，isLazilyParsed()将返回 true。
-    //注意：当前报文将持有ByteBuf 的引用，请记住在报文被完全读取之前释放ByteBuf。
+    // 注意：当前报文将持有ByteBuf 的引用，请记住在报文被完全读取之前释放ByteBuf。
     void parseFrom(ByteBuf buffer, int size);
 
     /**
@@ -80,24 +78,18 @@ public interface ApiMessage {
      * byte[]} will make the message corrupt.
      */
     // 根据给定的字节数组反序列化信息。
-    //注意：当前信息将持有byte[] 的引用，修改byte[]将使信息损坏。
+    // 注意：当前信息将持有byte[] 的引用，修改byte[]将使信息损坏。
     void parseFrom(byte[] a);
 
-    /**
-     * Serialize the message into the given {@link ByteBuf}.
-     */
+    /** Serialize the message into the given {@link ByteBuf}. */
     // 将信息序列化到给定的ByteBuf 中。
     int writeTo(ByteBuf buffer);
 
-    /**
-     * Serialize the message into the given {@link WritableOutput}.
-     */
+    /** Serialize the message into the given {@link WritableOutput}. */
     // 将信息序列化到给定的WritableOutput 中。
     void writeTo(WritableOutput output);
 
-    /**
-     * Serialize the message into byte array.
-     */
-    //将信息序列化为字节数组。
+    /** Serialize the message into byte array. */
+    // 将信息序列化为字节数组。
     byte[] toByteArray();
 }

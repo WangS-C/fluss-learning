@@ -35,18 +35,18 @@ import com.alibaba.fluss.server.zk.data.TableRegistration;
 import com.alibaba.fluss.shaded.zookeeper3.org.apache.zookeeper.KeeperException;
 import com.alibaba.fluss.utils.function.RunnableWithException;
 import com.alibaba.fluss.utils.function.ThrowingRunnable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-/**
- * A manager for metadata.
- */
+/** A manager for metadata. */
 public class MetaDataManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetaDataManager.class);
@@ -134,7 +134,7 @@ public class MetaDataManager {
 
         // in here, we just delete the table node in zookeeper, which will then trigger
         // the physical deletion in tablet servers and assignments in zk
-        //在这里，我们只需在 zookeeper 中删除表节点，然后在 tablet 服务器中触发物理删除，并在 zk 中进行分配
+        // 在这里，我们只需在 zookeeper 中删除表节点，然后在 tablet 服务器中触发物理删除，并在 zk 中进行分配
         uncheck(() -> zookeeperClient.deleteTable(tablePath), "Fail to drop table: " + tablePath);
     }
 
@@ -160,19 +160,19 @@ public class MetaDataManager {
      * Creates the necessary metadata of the given table in zookeeper and return the table id.
      * Returns -1 if the table already exists and ignoreIfExists is true.
      *
-     * @param tablePath       the table path
+     * @param tablePath the table path
      * @param tableDescriptor the table descriptor
      * @param tableAssignment the table assignment, will be null when the table is partitioned table
-     * @param ignoreIfExists  whether to ignore if the table already exists
+     * @param ignoreIfExists whether to ignore if the table already exists
      * @return the table id
      */
-    //在 zookeeper 中创建给定表的必要元数据，并返回表 id。
+    // 在 zookeeper 中创建给定表的必要元数据，并返回表 id。
     // 如果表已存在且 ignoreIfExists 为 true，则返回-1。
-    //参数
-    //tablePath- 表路径
-    //tableDescriptor- 表描述符
-    //tableAssignment- 表分配，当表是分区表时将为空
-    //ignoreIfExists- 是否忽略表是否已存在
+    // 参数
+    // tablePath- 表路径
+    // tableDescriptor- 表描述符
+    // tableAssignment- 表分配，当表是分区表时将为空
+    // ignoreIfExists- 是否忽略表是否已存在
     public long createTable(
             TablePath tablePath,
             TableDescriptor tableDescriptor,
@@ -192,13 +192,13 @@ public class MetaDataManager {
         }
 
         // validate all table properties are known to Fluss and property values are valid.
-        //验证 Fluss 已知所有表格属性，且属性值有效。
+        // 验证 Fluss 已知所有表格属性，且属性值有效。
         FlussConfigUtils.validateTableProperties(tableDescriptor.getProperties());
 
         // register schema to zk
         // first register a schema to the zk, if then register the table
         // to zk fails, there's no harm to register a new schema to zk again
-        //先向 zk 注册模式，如果向 zk 注册表失败，再向 zk 注册新模式也无妨
+        // 先向 zk 注册模式，如果向 zk 注册表失败，再向 zk 注册新模式也无妨
         try {
             zookeeperClient.registerSchema(tablePath, tableDescriptor.getSchema());
         } catch (Exception e) {
@@ -208,11 +208,11 @@ public class MetaDataManager {
 
         // register the table, we have registered the schema whose path have contained the node for
         // the table, then we won't need to create the node to store the table
-        //注册表时，我们已经注册了模式，其路径包含了表的节点，这样我们就不需要创建节点来存储表了
+        // 注册表时，我们已经注册了模式，其路径包含了表的节点，这样我们就不需要创建节点来存储表了
         return uncheck(
                 () -> {
                     // generate a table id
-                    //生成表 id
+                    // 生成表 id
                     long tableId = zookeeperClient.getTableIdAndIncrement();
                     if (tableAssignment != null) {
                         // register table assignment

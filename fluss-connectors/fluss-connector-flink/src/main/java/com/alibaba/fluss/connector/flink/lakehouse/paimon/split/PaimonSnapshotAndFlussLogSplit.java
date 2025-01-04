@@ -18,22 +18,28 @@ package com.alibaba.fluss.connector.flink.lakehouse.paimon.split;
 
 import com.alibaba.fluss.connector.flink.source.split.SourceSplitBase;
 import com.alibaba.fluss.metadata.TableBucket;
-
 import org.apache.paimon.flink.source.FileStoreSourceSplit;
 
 import javax.annotation.Nullable;
-
 import java.util.Optional;
 
-/** A split mixing Paimon snapshot and Fluss log. */
+/**
+ * A split mixing Paimon snapshot and Fluss log.
+ */
+//Paimon 快照和 Fluss 日志的混合拆分。
 public class PaimonSnapshotAndFlussLogSplit extends SourceSplitBase {
 
     public static final byte PAIMON_SNAPSHOT_FLUSS_LOG_SPLIT_KIND = -2;
 
     // may be null when no snapshot data for the bucket
-    @Nullable private final FileStoreSourceSplit snapshotSplit;
+    //如果桶没有快照数据，则可能为null
+    @Nullable
+    private final FileStoreSourceSplit snapshotSplit;
 
-    /** The records to skip when reading the splits. */
+    /**
+     * The records to skip when reading the splits.
+     */
+    //读取分割信息时要跳过的记录。
     private final long recordsToSkip;
 
     private final long startingOffset;

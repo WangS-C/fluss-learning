@@ -18,12 +18,18 @@ package com.alibaba.fluss.connector.flink.lakehouse.paimon.split;
 
 import com.alibaba.fluss.connector.flink.source.split.SourceSplitState;
 
-/** State of {@link PaimonSnapshotAndFlussLogSplit}. */
+/**
+ * State of {@link PaimonSnapshotAndFlussLogSplit}.
+ */
+//PaimonSnapshotAndFlussLogSplit 的状态。
 public class PaimonSnapshotAndFlussLogSplitState extends SourceSplitState {
 
     private final PaimonSnapshotAndFlussLogSplit paimonSnapshotAndFlussLogSplit;
 
-    /** The records to skip while reading a snapshot. */
+    /**
+     * The records to skip while reading a snapshot.
+     */
+    //读取快照时要跳过的记录。
     private long recordsToSkip;
 
     public PaimonSnapshotAndFlussLogSplitState(
